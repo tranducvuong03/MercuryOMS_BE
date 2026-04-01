@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using MercuryOMS.Application.Commons.Models.Responses.Product;
 using MercuryOMS.Application.Models.Responses;
 using MercuryOMS.Domain.Entities;
 
@@ -10,7 +9,6 @@ namespace MercuryOMS.Application.Commons.AutoMapper
         public AutoMapping()
         {
             CreateMap<Category, CategoryResponse>();
-            CreateMap<Product,ProductResponse>();
         }
     }
 }

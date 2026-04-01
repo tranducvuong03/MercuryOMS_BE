@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Folder Include="Commons\Behaviours\" />
+    <Folder Include="Features\Products\Commands\" />
   </ItemGroup>
 
   <ItemGroup>

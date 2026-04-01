@@ -24,7 +24,7 @@ namespace MercuryOMS.Domain.Entities
             SetDescription(description);
         }
 
-        private void SetName(string name)
+        public void SetName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Category name cannot be empty.");
@@ -35,7 +35,7 @@ namespace MercuryOMS.Domain.Entities
             Name = name;
         }
 
-        private void SetDescription(string description)
+        public void SetDescription(string description)
         {
             Description = description?.Trim() ?? string.Empty;
         }

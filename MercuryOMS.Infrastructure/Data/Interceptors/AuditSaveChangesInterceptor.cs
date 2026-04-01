@@ -1,4 +1,5 @@
 ﻿using MercuryOMS.Domain.Commons;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -6,6 +7,13 @@ namespace MercuryOMS.Infrastructure.Data.Interceptors
 {
     public class AuditSaveChangesInterceptor : SaveChangesInterceptor
     {
+        private readonly ICurrentUserService _currentUser;
+
+        public AuditSaveChangesInterceptor(ICurrentUserService currentUser)
+        {
+            _currentUser = currentUser;
+        }
+
         public override InterceptionResult<int> SavingChanges(
             DbContextEventData eventData,
             InterceptionResult<int> result)
@@ -23,7 +31,7 @@ namespace MercuryOMS.Infrastructure.Data.Interceptors
             return base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        private static void ApplyAudit(DbContext? context)
+        private void ApplyAudit(DbContext? context)
         {
             if (context == null) return;
 
@@ -34,10 +42,10 @@ namespace MercuryOMS.Infrastructure.Data.Interceptors
 
             foreach (var entry in entries)
             {
-                if (entry.Entity is AuditableEntity)
-                {
-                    var entity = (AuditableEntity)entry.Entity;
+                var userId = _currentUser.UserId;
 
+                if (entry.Entity is AuditableEntity entity)
+                {
                     if (entry.State == EntityState.Added)
                     {
                         entity.CreatedAt = DateTime.UtcNow;
@@ -46,16 +54,15 @@ namespace MercuryOMS.Infrastructure.Data.Interceptors
                     entity.LastModifiedAt = DateTime.UtcNow;
                 }
 
-                if (entry.Entity is IAuditableUser)
+                if (entry.Entity is IAuditableUser userEntity)
                 {
-                    var entity = (IAuditableUser)entry.Entity;
-
                     if (entry.State == EntityState.Added)
                     {
-                        //entity.CreatedBy = ;
+                        if (string.IsNullOrEmpty(userEntity.CreatedBy))
+                            userEntity.CreatedBy = userId;
                     }
 
-                    //entity.LastModifiedBy = ;
+                    userEntity.LastModifiedBy = userId;
                 }
             }
         }

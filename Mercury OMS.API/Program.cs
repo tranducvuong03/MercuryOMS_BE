@@ -1,6 +1,7 @@
 using MercuryOMS.API.Middlewares;
 using MercuryOMS.Application;
 using MercuryOMS.Infrastructure;
+using MercuryOMS.Infrastructure.SeedData;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -30,16 +32,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Seed data
+await app.SeedDataAsync();
+
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
 app.UseAuthentication();
-
+app.UseAuthorization();
 app.UseCors("AllowAll");
-
 app.UseMiddleware<RequestTimeMiddleware>();
-
 app.MapControllers();
-
 app.Run();
