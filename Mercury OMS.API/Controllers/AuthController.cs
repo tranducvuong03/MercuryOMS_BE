@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using MercuryOMS.Application.Features;
+using MercuryOMS.Domain.Enums;
 using MercuryOMS.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +12,10 @@ public class AuthController : ControllerBase
     private readonly IMediator _mediator;
     private readonly SignInManager<ApplicationUser> _signInManager;
 
-    public AuthController(IMediator mediator)
+    public AuthController(IMediator mediator, SignInManager<ApplicationUser> signInManager)
     {
         _mediator = mediator;
+        _signInManager = signInManager;
     }
 
     [HttpPost("register")]
@@ -39,14 +41,14 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("external-login")]
-    public IActionResult ExternalLogin(string provider)
+    public IActionResult ExternalLogin([FromQuery] ExternalProvider provider)
     {
         var redirectUrl = Url.Action("ExternalCallback", "Auth");
 
         var properties = _signInManager
-                        .ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            .ConfigureExternalAuthenticationProperties(provider.ToString(), redirectUrl);
 
-        return Challenge(properties, provider);
+        return Challenge(properties, provider.ToString());
     }
 
     [HttpGet("external-callback")]

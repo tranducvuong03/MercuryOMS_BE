@@ -5,6 +5,7 @@ using MercuryOMS.Infrastructure.Data.Interceptors;
 using MercuryOMS.Infrastructure.Identity;
 using MercuryOMS.Infrastructure.Repositories;
 using MercuryOMS.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -85,7 +86,7 @@ namespace MercuryOMS.Infrastructure
                     IConfiguration configuration)
         {
             services.AddAuthentication()
-                .AddGoogle("Google", options =>
+                .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
                 {
                     options.ClientId = configuration["Auth:Google:ClientId"];
                     options.ClientSecret = configuration["Auth:Google:ClientSecret"];
