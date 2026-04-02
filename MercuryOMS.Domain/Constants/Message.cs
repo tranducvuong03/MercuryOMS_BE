@@ -29,6 +29,9 @@
         public const string AuthLockedOut = "Tài khoản đang bị khoá.";
         public const string AuthNotAllowed = "Vui lòng xác nhận email.";
 
+        public const string ExternalLoginProviderNotFound = "Không tìm thấy thông tin đăng nhập từ nhà cung cấp.";
+        public const string ExternalEmailNotFound = "Không tìm thấy email từ nhà cung cấp đăng nhập.";
+
         // Email
         public const string EmailConfirmSent = "Email xác nhận đã được gửi.";
         public const string EmailConfirmed = "Xác nhận email thành công.";

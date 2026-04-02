@@ -25,6 +25,7 @@ namespace MercuryOMS.Infrastructure
             services.AddRepository();
             services.AddServices();
             services.AddJwt(configuration);
+            services.AddExternal(configuration);
             return services;
         }
 
@@ -76,6 +77,19 @@ namespace MercuryOMS.Infrastructure
 
             services.AddAuthorization();
 
+            return services;
+        }
+
+        private static IServiceCollection AddExternal(
+                    this IServiceCollection services,
+                    IConfiguration configuration)
+        {
+            services.AddAuthentication()
+                .AddGoogle("Google", options =>
+                {
+                    options.ClientId = configuration["Auth:Google:ClientId"];
+                    options.ClientSecret = configuration["Auth:Google:ClientSecret"];
+                });
             return services;
         }
 

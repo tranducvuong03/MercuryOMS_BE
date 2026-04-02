@@ -50,6 +50,63 @@ namespace MercuryOMS.Infrastructure.Services
             return Result<string>.Success(token);
         }
 
+        public async Task<Result<string>> ExternalLoginAsync()
+        {
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+
+            if (info == null)
+                return Result<string>.Failure(Message.ExternalLoginProviderNotFound);
+
+            var signInResult = await _signInManager.ExternalLoginSignInAsync(
+                info.LoginProvider,
+                info.ProviderKey,
+                isPersistent: false);
+
+            ApplicationUser user;
+
+            if (signInResult.Succeeded)
+            {
+                user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            }
+            else
+            {
+                var email = info.Principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+                if (email == null)
+                    return Result<string>.Failure(Message.ExternalEmailNotFound);
+
+                user = await _userManager.FindByEmailAsync(email);
+
+                if (user == null)
+                {
+                    user = new ApplicationUser
+                    {
+                        Email = email,
+                        UserName = email,
+                        EmailConfirmed = true
+                    };
+
+                    await _userManager.CreateAsync(user);
+                    await _userManager.AddToRoleAsync(user, Role.Member);
+                }
+
+                await _userManager.AddLoginAsync(user, info);
+            }
+
+            var token = await _jwtService.GenerateTokenAsync(user);
+
+            return Result<string>.Success(token);
+        }
+
+        public async Task<string> GetExternalLoginUrlAsync(string provider)
+        {
+            var redirectUrl = $"{_configuration["App:BaseUrl"]}/api/auth/external-callback";
+
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+
+            return properties.RedirectUri!;
+        }
+
         public async Task<Result> RegisterAsync(string email, string password, string fullName, CancellationToken ct)
         {
             var existing = await _userManager.FindByEmailAsync(email);
