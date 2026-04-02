@@ -31,12 +31,11 @@ namespace MercuryOMS.Domain.Entities
             IsActive = true;
         }
 
-        // ---------- Core behavior ----------
-
+        // Core
         public void SetName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Product name is required.");
+                throw new ArgumentException("Tên sản phẩm là bắt buộc.");
 
             Name = name.Trim();
         }
@@ -49,7 +48,7 @@ namespace MercuryOMS.Domain.Entities
         public void SetBasePrice(decimal price)
         {
             if (price <= 0)
-                throw new ArgumentException("Base price must be greater than zero.");
+                throw new ArgumentException("Giá sản phẩm phải lớn hơn 0.");
 
             BasePrice = price;
         }
@@ -57,7 +56,7 @@ namespace MercuryOMS.Domain.Entities
         public void Activate() => IsActive = true;
         public void Deactivate() => IsActive = false;
 
-        // ---------- Category ----------
+        // Category
         public void AddCategory(Guid categoryId)
         {
             if (_categories.Any(x => x.CategoryId == categoryId))
@@ -73,11 +72,14 @@ namespace MercuryOMS.Domain.Entities
                 _categories.Remove(category);
         }
 
-        // ---------- Image ----------
+        // Image
         public void AddImage(string url, bool isPrimary = false)
         {
             if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentException("Image url is required.");
+                throw new ArgumentException("Đường dẫn ảnh là bắt buộc.");
+
+            if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                throw new ArgumentException("URL ảnh không hợp lệ.");
 
             if (isPrimary)
             {
@@ -95,11 +97,20 @@ namespace MercuryOMS.Domain.Entities
                 _images.Remove(img);
         }
 
-        // ---------- Variant ----------
+        // Variant
         public void AddVariant(string sku, decimal price, int stock)
         {
+            if (string.IsNullOrWhiteSpace(sku))
+                throw new ArgumentException("SKU là bắt buộc.");
+
+            if (price <= 0)
+                throw new ArgumentException("Giá biến thể phải lớn hơn 0.");
+
+            if (stock < 0)
+                throw new ArgumentException("Số lượng tồn không hợp lệ.");
+
             if (_variants.Any(x => x.Sku == sku))
-                throw new ArgumentException("SKU already exists.");
+                throw new ArgumentException("SKU đã tồn tại.");
 
             _variants.Add(new ProductVariant(Id, sku, price, stock));
         }
@@ -114,7 +125,7 @@ namespace MercuryOMS.Domain.Entities
         {
             var variant = _variants.FirstOrDefault(x => x.Id == variantId);
             if (variant == null)
-                throw new ArgumentException("Variant not found.");
+                throw new ArgumentException("Không tìm thấy biến thể sản phẩm.");
 
             return variant;
         }

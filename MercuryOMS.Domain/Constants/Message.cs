@@ -7,10 +7,21 @@
 
         // Product
         public const string ProductNotFound = "Không tìm thấy sản phẩm.";
+        public const string ProductUpdated = "Cập nhật sản phẩm thành công.";
+        public const string ProductDeleted = "Xoá sản phẩm thành công.";
+        public const string ProductCreated = "Tạo sản phẩm thành công.";
+
+        // Inventory
+        public const string InventoryNotFound = "Không tìm thấy tồn kho.";
+        public const string InventoryReserved = "Giữ hàng thành công.";
+        public const string InventoryCommitted = "Xác nhận trừ kho thành công.";
+        public const string InventoryReleased = "Trả lại kho thành công.";
+        public const string InventoryStockIn = "Nhập kho thành công.";
+        public const string InventoryAdjusted = "Điều chỉnh kho thành công.";
 
         // Auth
         public const string LoginSuccess = "Đăng nhập thành công.";
-        public const string RegisterSuccess = "Đăng ký thành công.";
+        public const string RegisterSuccess = "Đăng ký thành công. Vui lòng xác nhận trong email.";
 
         public const string AuthEmailNotFound = "Email không tồn tại.";
         public const string AuthEmailAlreadyExists = "Email đã được sử dụng.";

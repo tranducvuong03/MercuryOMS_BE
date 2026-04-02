@@ -4,8 +4,8 @@
     {
         StockIn,     // nhập kho
         Reserve,     // giữ chỗ
-        Commit,      // bán (chốt)
+        Commit,      // bán
         Release,     // trả kho
-        Adjust       // chỉnh tay (admin)
+        Adjust       // chỉnh tay
     }
 }

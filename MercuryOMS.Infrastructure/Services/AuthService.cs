@@ -3,6 +3,7 @@ using MercuryOMS.Application.IServices;
 using MercuryOMS.Domain.Constants;
 using MercuryOMS.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace MercuryOMS.Infrastructure.Services
 {
@@ -12,33 +13,41 @@ namespace MercuryOMS.Infrastructure.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
+        private readonly IJwtService _jwtService;
 
         public AuthService(
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguration configuration,
+            IJwtService jwtService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _roleManager = roleManager;
             _emailService = emailService;
+            _configuration = configuration;
+            _jwtService = jwtService;
         }
 
-        public async Task<Result> LoginAsync(string email, string password, CancellationToken ct)
+        public async Task<Result<string>> LoginAsync(string email, string password, CancellationToken ct)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-                return Result.Failure(Message.AuthEmailNotFound);
+                return Result<string>.Failure(Message.AuthEmailNotFound);
 
             var result = await _signInManager.CheckPasswordSignInAsync(
-                user, password, lockoutOnFailure: true);
+                user, password, false);
 
-            if (result.IsLockedOut) return Result.Failure(Message.AuthLockedOut);
-            if (result.IsNotAllowed) return Result.Failure(Message.AuthNotAllowed);
-            if (!result.Succeeded) return Result.Failure(Message.AuthInvalidPassword);
+            if (result.IsLockedOut) return Result<string>.Failure(Message.AuthLockedOut);
+            if (result.IsNotAllowed) return Result<string>.Failure(Message.AuthNotAllowed);
+            if (!result.Succeeded) return Result<string>.Failure(Message.AuthInvalidPassword);
 
-            return Result.Success(Message.LoginSuccess);
+            var token = await _jwtService.GenerateTokenAsync(user);
+
+            return Result<string>.Success(token);
         }
 
         public async Task<Result> RegisterAsync(string email, string password, string fullName, CancellationToken ct)
@@ -71,23 +80,6 @@ namespace MercuryOMS.Infrastructure.Services
             return Result.Success(Message.RegisterSuccess);
         }
 
-        public async Task<Result> ConfirmEmailAsync(string userId, string token)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return Result.Failure(Message.UserNotFound);
-
-            if (user.EmailConfirmed)
-                return Result.Failure(Message.EmailAlreadyConfirmed);
-
-            var result = await _userManager.ConfirmEmailAsync(user, token);
-
-            if (!result.Succeeded)
-                return Result.Failure(Message.EmailConfirmInvalidToken);
-
-            return Result.Success(Message.EmailConfirmed);
-        }
-
         public async Task<Result> ResendConfirmEmailAsync(string email, CancellationToken ct)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -106,13 +98,33 @@ namespace MercuryOMS.Infrastructure.Services
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
+            var baseUrl = _configuration["App:BaseUrl"];
+
             var confirmLink =
-                $"https://localhost:7245/api/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+                $"{baseUrl}/api/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
 
             await _emailService.SendAsync(
                 user.Email!,
-                "Confirm your email",
-                $"Click để xác nhận: <a href='{confirmLink}'>Confirm Email</a>");
+                "CONFIRM YOUR EMAIL",
+                EmailTemplates.ConfirmEmail(confirmLink));
         }
+
+        public async Task<Result> ConfirmEmailAsync(string userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return Result.Failure(Message.UserNotFound);
+
+            if (user.EmailConfirmed)
+                return Result.Failure(Message.EmailAlreadyConfirmed);
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (!result.Succeeded)
+                return Result.Failure(Message.EmailConfirmInvalidToken);
+
+            return Result.Success(Message.EmailConfirmed);
+        }
+
     }
 }

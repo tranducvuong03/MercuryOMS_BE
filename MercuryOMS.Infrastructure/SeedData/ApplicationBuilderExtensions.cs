@@ -14,6 +14,8 @@ namespace MercuryOMS.Infrastructure.SeedData
             // Role
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             await RoleSeeder.SeedAsync(roleManager);
+
+
         }
     }
 }

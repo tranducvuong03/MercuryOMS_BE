@@ -24,7 +24,7 @@ public class Cart : AggregateRoot, IAuditableUser
     public void AddItem(Guid productId, int quantity)
     {
         if (quantity <= 0)
-            throw new ArgumentException("Quantity must be greater than zero.");
+            throw new ArgumentException("Số lượng phải lớn hơn 0.");
 
         var item = _items.FirstOrDefault(i => i.ProductId == productId);
 
@@ -55,7 +55,7 @@ public class Cart : AggregateRoot, IAuditableUser
     {
         var item = _items.FirstOrDefault(i => i.ProductId == productId);
         if (item == null)
-            throw new ArgumentException("Item not found in cart.");
+            throw new ArgumentException("Không tìm thấy hàng trong giỏ.");
 
         return item;
     }

@@ -5,7 +5,7 @@ namespace MercuryOMS.Domain.Entities
     public class ProductVariant : BaseEntity
     {
         public Guid ProductId { get; private set; }
-        public string Sku { get; private set; } = null!;
+        public string Sku { get; private set; } = null!;  //mã định danh duy nhất cho biến thể sản phẩm
         public decimal Price { get; private set; }
         public int Stock { get; private set; }
 
@@ -14,10 +14,10 @@ namespace MercuryOMS.Domain.Entities
         internal ProductVariant(Guid productId, string sku, decimal price, int stock)
         {
             if (price <= 0)
-                throw new ArgumentException("Price must be greater than zero.");
+                throw new ArgumentException("Giá sản phẩm phải lớn hơn 0.");
 
             if (stock < 0)
-                throw new ArgumentException("Stock cannot be negative.");
+                throw new ArgumentException("Hàng còn lại không được âm.");
 
             Id = Guid.NewGuid();
             ProductId = productId;
@@ -29,7 +29,7 @@ namespace MercuryOMS.Domain.Entities
         internal void SetStock(int stock)
         {
             if (stock < 0)
-                throw new ArgumentException("Stock cannot be negative.");
+                throw new ArgumentException("Hàng còn lại không được âm.");
 
             Stock = stock;
         }

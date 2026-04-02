@@ -23,7 +23,7 @@ namespace MercuryOMS.Domain.Entities
             Guid? referenceId = null)
         {
             if (quantity <= 0)
-                throw new ArgumentException("Quantity must be greater than zero.");
+                throw new ArgumentException("Số lượng phải lớn hơn 0.");
 
             Id = Guid.NewGuid();
             InventoryId = inventoryId;

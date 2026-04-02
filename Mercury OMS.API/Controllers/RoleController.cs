@@ -1,10 +1,12 @@
 ﻿using MediatR;
 using MercuryOMS.Application.Features;
 using MercuryOMS.Application.Features.Roles.Commands;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/roles")]
+[Authorize]
 public class RoleController : ControllerBase
 {
     private readonly IMediator _mediator;

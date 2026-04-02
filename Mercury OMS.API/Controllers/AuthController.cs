@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using MercuryOMS.Application.Features;
-using MercuryOMS.Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -36,6 +35,7 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
+    // dùng cho callback
     [HttpGet("confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token, CancellationToken ct)
     {
