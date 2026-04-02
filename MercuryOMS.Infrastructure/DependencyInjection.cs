@@ -5,6 +5,7 @@ using MercuryOMS.Infrastructure.Data.Interceptors;
 using MercuryOMS.Infrastructure.Identity;
 using MercuryOMS.Infrastructure.Repositories;
 using MercuryOMS.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -90,6 +91,11 @@ namespace MercuryOMS.Infrastructure
                 {
                     options.ClientId = configuration["Auth:Google:ClientId"];
                     options.ClientSecret = configuration["Auth:Google:ClientSecret"];
+                }).AddFacebook(FacebookDefaults.AuthenticationScheme, options =>
+                {
+                    options.AppId = configuration["Auth:Facebook:AppId"];
+                    options.AppSecret = configuration["Auth:Facebook:AppSecret"];
+                    options.Scope.Add("email");
                 });
             return services;
         }

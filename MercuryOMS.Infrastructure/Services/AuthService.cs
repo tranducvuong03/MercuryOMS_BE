@@ -81,6 +81,7 @@ namespace MercuryOMS.Infrastructure.Services
                 {
                     user = new ApplicationUser
                     {
+                        FullName = info.Principal.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? email,
                         Email = email,
                         UserName = email,
                         EmailConfirmed = true

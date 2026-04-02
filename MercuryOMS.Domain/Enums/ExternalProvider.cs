@@ -2,6 +2,7 @@
 {
     public enum ExternalProvider
     {
-        Google
+        Google,
+        Facebook
     }
 }
