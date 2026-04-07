@@ -42,7 +42,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // DI
-builder.Services.AddApplication();
+builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 
 // CORS
@@ -72,5 +72,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors("AllowAll");
 app.UseMiddleware<RequestTimeMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.Run();

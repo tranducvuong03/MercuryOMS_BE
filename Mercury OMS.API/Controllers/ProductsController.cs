@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using MercuryOMS.Application.Features;
+using MercuryOMS.Application.Models.Requests;
 using MercuryOMS.Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -69,12 +70,10 @@ namespace MercuryOMS.API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetList(
-            [FromQuery] int pageIndex = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] bool onlyActive = true)
+            [FromQuery] ProductFilterRequest request)
         {
             var result = await _mediator.Send(
-                new ListProductsPaginatedQuery(pageIndex, pageSize, onlyActive));
+                new GetProducts(request));
 
             return Ok(result);
         }

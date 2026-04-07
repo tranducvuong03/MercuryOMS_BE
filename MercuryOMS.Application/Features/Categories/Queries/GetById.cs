@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using MercuryOMS.Application.Interfaces;
-using MercuryOMS.Application.Models.Responses;
+using MercuryOMS.Application.Models;
 
 namespace MercuryOMS.Application.Features
 {

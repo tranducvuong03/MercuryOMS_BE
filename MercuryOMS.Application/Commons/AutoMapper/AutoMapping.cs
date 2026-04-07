@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using MercuryOMS.Application.Models.Responses;
+using MercuryOMS.Application.Models;
 using MercuryOMS.Domain.Entities;
 
 namespace MercuryOMS.Application.Commons.AutoMapper

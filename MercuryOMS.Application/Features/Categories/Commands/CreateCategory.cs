@@ -2,7 +2,7 @@
 using MediatR;
 using MercuryOMS.Application.Commons;
 using MercuryOMS.Application.Interfaces;
-using MercuryOMS.Application.Models.Responses;
+using MercuryOMS.Application.Models;
 using MercuryOMS.Domain.Entities;
 
 namespace MercuryOMS.Application.Features

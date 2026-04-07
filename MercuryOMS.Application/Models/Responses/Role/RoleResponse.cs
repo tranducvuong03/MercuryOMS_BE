@@ -1,4 +1,4 @@
-﻿namespace MercuryOMS.Application.Models.Responses
+﻿namespace MercuryOMS.Application.Models
 {
     public class RoleResponse
     {

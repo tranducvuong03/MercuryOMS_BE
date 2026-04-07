@@ -25,7 +25,7 @@ namespace MercuryOMS.Infrastructure.Repositories
             return await _db.Set<T>().FindAsync(new object[] { id }, cancellationToken);
         }
 
-        public async Task<IQueryable<T>> GetByFilters(IEnumerable<Expression<Func<T, bool>>> filters)
+        public async Task<IQueryable<T>> GetByFiltersAsync(IEnumerable<Expression<Func<T, bool>>> filters)
         {
             IQueryable<T> query = _dbSet;
             if (filters is not null && filters.Any())

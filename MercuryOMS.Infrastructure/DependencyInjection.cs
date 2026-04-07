@@ -1,5 +1,6 @@
 ﻿using MercuryOMS.Application.Interfaces;
 using MercuryOMS.Application.IServices;
+using MercuryOMS.Domain.Commons;
 using MercuryOMS.Infrastructure.Data;
 using MercuryOMS.Infrastructure.Data.Interceptors;
 using MercuryOMS.Infrastructure.Identity;
@@ -28,6 +29,7 @@ namespace MercuryOMS.Infrastructure
             services.AddServices();
             services.AddJwt(configuration);
             services.AddExternal(configuration);
+            services.AddRedis(configuration);
             return services;
         }
 
@@ -100,13 +102,28 @@ namespace MercuryOMS.Infrastructure
             return services;
         }
 
+        private static IServiceCollection AddRedis(
+            this IServiceCollection services,
+            IConfiguration configuration)
+        {
+            var redisConnectionString = configuration["RedisStrings:Redis"];
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnectionString;
+                options.InstanceName = "MercuryOMS_Dev_";
+            });
+            services.AddSingleton<ICacheService, RedisCacheService>();
+            return services;
+        }
+
         private static IServiceCollection AddRepository(
             this IServiceCollection services)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-            
+
             return services;
         }
 

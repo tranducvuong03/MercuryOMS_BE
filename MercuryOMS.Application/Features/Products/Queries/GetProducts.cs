@@ -1,56 +1,92 @@
 ﻿using MediatR;
-using MercuryOMS.Application.Common;
 using MercuryOMS.Application.Commons;
 using MercuryOMS.Application.Interfaces;
+using MercuryOMS.Application.Models;
+using MercuryOMS.Application.Models.Requests;
+using MercuryOMS.Domain.Commons;
+using MercuryOMS.Domain.Constants;
 using MercuryOMS.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace MercuryOMS.Application.Features
 {
-    public record ListProductsPaginatedQuery(
-        int PageIndex = 1,
-        int PageSize = 10,
-        bool OnlyActive = true
-    ) : IRequest<Result<BasePaginated<Product>>>;
+    public record GetProducts(ProductFilterRequest Filter)
+    : IRequest<Result<BasePaginated<ProductResponse>>>;
 
-    public class ListProductsPaginatedQueryHandler
-    : IRequestHandler<ListProductsPaginatedQuery, Result<BasePaginated<Product>>>
+    public class GetProductsHandler
+    : IRequestHandler<GetProducts, Result<BasePaginated<ProductResponse>>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cache;
 
-        public ListProductsPaginatedQueryHandler(IUnitOfWork unitOfWork)
+        public GetProductsHandler(
+            IUnitOfWork unitOfWork,
+            ICacheService cache)
         {
             _unitOfWork = unitOfWork;
+            _cache = cache;
         }
 
-        public async Task<Result<BasePaginated<Product>>> Handle(
-            ListProductsPaginatedQuery request,
-            CancellationToken ct)
+        public async Task<Result<BasePaginated<ProductResponse>>> Handle(
+            GetProducts request, CancellationToken ct)
         {
-            var repo = _unitOfWork.GetRepository<Product>();
+            var f = request.Filter;
 
+            var cacheKey = CacheKeys.ProductsPaged(
+                f.PageIndex, f.PageSize,
+                f.IsActive, f.MinPrice, f.MaxPrice);
+
+            var cached = await _cache.GetAsync<BasePaginated<ProductResponse>>(cacheKey);
+            if (cached != null)
+                return Result<BasePaginated<ProductResponse>>.Success(cached);
+
+            var result = await QueryPagedAsync(f, ct);
+
+            await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+            return Result<BasePaginated<ProductResponse>>.Success(result);
+        }
+
+        private List<Expression<Func<Product, bool>>> BuildFilters(ProductFilterRequest f)
+        {
             var filters = new List<Expression<Func<Product, bool>>>();
-            if (request.OnlyActive)
+
+            if (f.IsActive)
                 filters.Add(x => x.IsActive);
 
-            var query = repo.GetByFilterWithPaginated(
-                request.PageIndex,
-                request.PageSize,
-                filters);
+            if (f.MinPrice.HasValue)
+                filters.Add(x => x.BasePrice >= f.MinPrice.Value);
 
-            var items = query.ToList();
+            if (f.MaxPrice.HasValue)
+                filters.Add(x => x.BasePrice <= f.MaxPrice.Value);
 
-            var totalItems = repo.Query
-                .Where(x => !request.OnlyActive || x.IsActive)
-                .Count();
+            return filters;
+        }
 
-            var result = new BasePaginated<Product>(
-                items,
-                request.PageIndex,
-                request.PageSize,
-                totalItems);
+        private async Task<BasePaginated<ProductResponse>> QueryPagedAsync(
+            ProductFilterRequest f, CancellationToken ct)
+        {
+            var repo = _unitOfWork.GetRepository<Product>();
+            var filters = BuildFilters(f);
 
-            return Result<BasePaginated<Product>>.Success(result);
+            var query = repo.GetByFilterWithPaginated(f.PageIndex, f.PageSize, filters);
+
+            var items = await query
+                .OrderBy(x => x.Name)
+                .Select(x => new ProductResponse
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Description = x.Description,
+                    BasePrice = x.BasePrice,
+                    IsActive = x.IsActive
+                })
+                .ToListAsync(ct);
+
+            var totalItems = await (await repo.GetByFiltersAsync(filters)).CountAsync(ct);
+
+            return new BasePaginated<ProductResponse>(items, f.PageIndex, f.PageSize, totalItems);
         }
     }
 }

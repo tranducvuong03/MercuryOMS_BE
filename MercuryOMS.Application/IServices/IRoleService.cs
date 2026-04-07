@@ -1,5 +1,5 @@
 ﻿using MercuryOMS.Application.Commons;
-using MercuryOMS.Application.Models.Responses;
+using MercuryOMS.Application.Models;
 
 namespace MercuryOMS.Application.IServices
 {

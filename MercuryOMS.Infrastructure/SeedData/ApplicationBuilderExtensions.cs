@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using MercuryOMS.Infrastructure.Data;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,7 +16,10 @@ namespace MercuryOMS.Infrastructure.SeedData
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             await RoleSeeder.SeedAsync(roleManager);
 
-
+            // Category
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            await CategorySeeder.SeedAsync(context);
+            await ProductSeeder.SeedAsync(context);
         }
     }
 }

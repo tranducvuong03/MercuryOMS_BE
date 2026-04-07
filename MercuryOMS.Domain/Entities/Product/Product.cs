@@ -1,4 +1,6 @@
 ﻿using MercuryOMS.Domain.Commons;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MercuryOMS.Domain.Entities
 {
@@ -9,10 +11,15 @@ namespace MercuryOMS.Domain.Entities
         private readonly List<ProductVariant> _variants = new();
 
         public string Name { get; private set; } = null!;
+        public string Slug { get; private set; } = null!;
         public string? Description { get; private set; }
-        public decimal BasePrice { get; private set; }
-        public bool IsActive { get; private set; }
 
+        public decimal BasePrice { get; private set; }
+        public decimal? OriginalPrice { get; private set; }
+
+        public bool IsActive { get; private set; }
+        public string? Brand { get; private set; }
+        public string? Thumbnail => _images.FirstOrDefault(x => x.IsPrimary)?.Url; 
         public string? CreatedBy { get; set; }
         public string? LastModifiedBy { get; set; }
 
@@ -24,20 +31,26 @@ namespace MercuryOMS.Domain.Entities
 
         public Product(string name, decimal basePrice)
         {
+            Id = Guid.NewGuid();
+
             SetName(name);
             SetBasePrice(basePrice);
+            SetSlug(name);
 
-            Id = Guid.NewGuid();
             IsActive = true;
         }
 
-        // Core
         public void SetName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Tên sản phẩm là bắt buộc.");
 
             Name = name.Trim();
+        }
+
+        public void SetSlug(string name)
+        {
+            Slug = GenerateSlug(name);
         }
 
         public void SetDescription(string? description)
@@ -53,10 +66,25 @@ namespace MercuryOMS.Domain.Entities
             BasePrice = price;
         }
 
+        public void SetOriginalPrice(decimal? price)
+        {
+            if (price.HasValue && price <= 0)
+                throw new ArgumentException("Giá gốc phải lớn hơn 0.");
+
+            OriginalPrice = price;
+        }
+
+        public void SetBrand(string brand)
+        {
+            if (string.IsNullOrWhiteSpace(brand))
+                throw new ArgumentException("Thương hiệu không hợp lệ.");
+
+            Brand = brand.Trim();
+        }
+
         public void Activate() => IsActive = true;
         public void Deactivate() => IsActive = false;
 
-        // Category
         public void AddCategory(Guid categoryId)
         {
             if (_categories.Any(x => x.CategoryId == categoryId))
@@ -72,7 +100,6 @@ namespace MercuryOMS.Domain.Entities
                 _categories.Remove(category);
         }
 
-        // Image
         public void AddImage(string url, bool isPrimary = false)
         {
             if (string.IsNullOrWhiteSpace(url))
@@ -97,8 +124,7 @@ namespace MercuryOMS.Domain.Entities
                 _images.Remove(img);
         }
 
-        // Variant
-        public void AddVariant(string sku, decimal price, int stock)
+        public void AddVariant(string sku, decimal price, string color, string? size = null)
         {
             if (string.IsNullOrWhiteSpace(sku))
                 throw new ArgumentException("SKU là bắt buộc.");
@@ -106,19 +132,13 @@ namespace MercuryOMS.Domain.Entities
             if (price <= 0)
                 throw new ArgumentException("Giá biến thể phải lớn hơn 0.");
 
-            if (stock < 0)
-                throw new ArgumentException("Số lượng tồn không hợp lệ.");
+            if (string.IsNullOrWhiteSpace(color))
+                throw new ArgumentException("Màu sắc là bắt buộc.");
 
             if (_variants.Any(x => x.Sku == sku))
                 throw new ArgumentException("SKU đã tồn tại.");
 
-            _variants.Add(new ProductVariant(Id, sku, price, stock));
-        }
-
-        public void UpdateVariantStock(Guid variantId, int stock)
-        {
-            var variant = GetVariant(variantId);
-            variant.SetStock(stock);
+            _variants.Add(new ProductVariant(Id, sku, price, color, size));
         }
 
         private ProductVariant GetVariant(Guid variantId)
@@ -128,6 +148,23 @@ namespace MercuryOMS.Domain.Entities
                 throw new ArgumentException("Không tìm thấy biến thể sản phẩm.");
 
             return variant;
+        }
+
+        private static string GenerateSlug(string name)
+        {
+            string str = name.ToLowerInvariant();
+
+            str = str.Normalize(NormalizationForm.FormD);
+            var chars = str.Where(c =>
+                System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                != System.Globalization.UnicodeCategory.NonSpacingMark);
+
+            str = new string(chars.ToArray());
+
+            str = Regex.Replace(str, @"[^a-z0-9\s-]", "");
+            str = Regex.Replace(str, @"\s+", "-").Trim('-');
+
+            return str;
         }
     }
 }

@@ -5,7 +5,7 @@ namespace MercuryOMS.Application.Interfaces
     public interface IGenericRepository<T> where T : class
     {
         IQueryable<T> Query { get; }
-        Task<IQueryable<T>> GetByFilters(
+        Task<IQueryable<T>> GetByFiltersAsync(
             IEnumerable<Expression<Func<T, bool>>> filters);
         IQueryable<T> GetByFilterWithPaginated(
             int pageIndex,

@@ -8,22 +8,20 @@ namespace MercuryOMS.Domain.Entities
         public string Sku { get; private set; } = null!;  //mã định danh duy nhất cho biến thể sản phẩm
         public decimal Price { get; private set; }
         public int Stock { get; private set; }
+        public string Color { get; private set; }
+        public string? Size { get; private set; }
 
         private ProductVariant() { }
 
-        internal ProductVariant(Guid productId, string sku, decimal price, int stock)
+        public ProductVariant(Guid productId, string sku, decimal price, string color, string? size)
         {
-            if (price <= 0)
-                throw new ArgumentException("Giá sản phẩm phải lớn hơn 0.");
-
-            if (stock < 0)
-                throw new ArgumentException("Hàng còn lại không được âm.");
-
             Id = Guid.NewGuid();
+
             ProductId = productId;
             Sku = sku;
             Price = price;
-            Stock = stock;
+            Color = color;
+            Size = size;
         }
 
         internal void SetStock(int stock)
