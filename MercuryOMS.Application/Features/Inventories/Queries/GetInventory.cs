@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MercuryOMS.Application.Features
 {
-    public record GetInventoryQuery(Guid ProductId) : IRequest<Result<InventoryResponse>>;
+    public record GetInventoryQuery(Guid VariantId) : IRequest<Result<InventoryResponse>>;
 
     public class GetInventoryHandler : IRequestHandler<GetInventoryQuery, Result<InventoryResponse>>
     {
@@ -25,7 +25,7 @@ namespace MercuryOMS.Application.Features
 
             var inventory = await repo.Query
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.ProductId == request.ProductId, ct);
+                .FirstOrDefaultAsync(x => x.VariantId == request.VariantId, ct);
 
             if (inventory == null)
                 return Result<InventoryResponse>.Failure(Message.InventoryNotFound);

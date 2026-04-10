@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MercuryOMS.Application.Features
 {
     public record StockInInventoryCommand(
-        Guid ProductId,
+        Guid VariantId,
         int Quantity,
         Guid? ReferenceId
     ) : IRequest<Result>;
@@ -24,15 +24,29 @@ namespace MercuryOMS.Application.Features
 
         public async Task<Result> Handle(StockInInventoryCommand request, CancellationToken ct)
         {
+            if (request.Quantity <= 0)
+                return Result.Failure("Quantity phải > 0");
+
             var repo = _unitOfWork.GetRepository<Inventory>();
 
             var inventory = await repo.Query
-                .FirstOrDefaultAsync(x => x.ProductId == request.ProductId, ct);
+                .FirstOrDefaultAsync(x => x.VariantId == request.VariantId, ct);
 
+            // 👉 Auto create nếu chưa có (quan trọng)
             if (inventory == null)
-                return Result.Failure(Message.InventoryNotFound);
+            {
+                inventory = new Inventory(request.VariantId, 0);
+                await repo.AddAsync(inventory, ct);
+            }
 
-            inventory.StockIn(request.Quantity, request.ReferenceId);
+            try
+            {
+                inventory.StockIn(request.Quantity, request.ReferenceId);
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure(ex.Message);
+            }
 
             await _unitOfWork.SaveChangesAsync(ct);
 

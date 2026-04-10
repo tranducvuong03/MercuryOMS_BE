@@ -1,4 +1,5 @@
 ﻿using MercuryOMS.Domain.Commons;
+using MercuryOMS.Domain.Exceptions;
 
 namespace MercuryOMS.Domain.Entities
 {
@@ -24,10 +25,10 @@ namespace MercuryOMS.Domain.Entities
         public void AddItem(Guid productId, int quantity, decimal unitPrice)
         {
             if (quantity <= 0)
-                throw new ArgumentException("Quantity must be greater than zero.");
+                throw new DomainException("Quantity must be greater than zero.");
 
             if (unitPrice < 0)
-                throw new ArgumentException("Unit price cannot be negative.");
+                throw new DomainException("Unit price cannot be negative.");
 
             var existing = _items.FirstOrDefault(x => x.ProductId == productId);
             if (existing != null)

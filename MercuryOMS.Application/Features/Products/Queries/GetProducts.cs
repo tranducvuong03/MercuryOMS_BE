@@ -31,21 +31,37 @@ namespace MercuryOMS.Application.Features
         public async Task<Result<BasePaginated<ProductResponse>>> Handle(
             GetProducts request, CancellationToken ct)
         {
-            var f = request.Filter;
+            try
+            {
+                var f = request.Filter;
 
-            var cacheKey = CacheKeys.ProductsPaged(
-                f.PageIndex, f.PageSize,
-                f.IsActive, f.MinPrice, f.MaxPrice);
+                if (f == null)
+                    return Result<BasePaginated<ProductResponse>>
+                        .Failure(Message.ProductFilterInvalid);
 
-            var cached = await _cache.GetAsync<BasePaginated<ProductResponse>>(cacheKey);
-            if (cached != null)
-                return Result<BasePaginated<ProductResponse>>.Success(cached);
+                var cacheKey = CacheKeys.ProductsPaged(
+                    f.PageIndex, f.PageSize,
+                    f.IsActive, f.MinPrice, f.MaxPrice);
 
-            var result = await QueryPagedAsync(f, ct);
+                var cached = await _cache.GetAsync<BasePaginated<ProductResponse>>(cacheKey);
+                if (cached != null)
+                {
+                    return Result<BasePaginated<ProductResponse>>
+                        .Success(cached, Message.ProductGetFromCache);
+                }
 
-            await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+                var result = await QueryPagedAsync(f, ct);
 
-            return Result<BasePaginated<ProductResponse>>.Success(result);
+                await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+                return Result<BasePaginated<ProductResponse>>
+                    .Success(result, Message.ProductGetSuccess);
+            }
+            catch (Exception)
+            {
+                return Result<BasePaginated<ProductResponse>>
+                    .Failure(Message.ProductGetFailed);
+            }
         }
 
         private List<Expression<Func<Product, bool>>> BuildFilters(ProductFilterRequest f)

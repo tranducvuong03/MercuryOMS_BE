@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MercuryOMS.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260401145426_db")]
+    [Migration("20260408082635_db")]
     partial class db
     {
         /// <inheritdoc />
@@ -49,41 +49,6 @@ namespace MercuryOMS.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Carts");
-                });
-
-            modelBuilder.Entity("Inventory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Available")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("LastModifiedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Reserved")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId")
-                        .IsUnique();
-
-                    b.ToTable("Inventories");
                 });
 
             modelBuilder.Entity("MercuryOMS.Domain.Entities.CartItem", b =>
@@ -137,6 +102,41 @@ namespace MercuryOMS.Infrastructure.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("MercuryOMS.Domain.Entities.Inventory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Available")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Reserved")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("VariantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VariantId")
+                        .IsUnique();
+
+                    b.ToTable("Inventories");
+                });
+
             modelBuilder.Entity("MercuryOMS.Domain.Entities.InventoryLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -147,6 +147,9 @@ namespace MercuryOMS.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("InventoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("InventoryId1")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Quantity")
@@ -161,6 +164,8 @@ namespace MercuryOMS.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("InventoryId");
+
+                    b.HasIndex("InventoryId1");
 
                     b.ToTable("InventoryLogs");
                 });
@@ -285,6 +290,9 @@ namespace MercuryOMS.Infrastructure.Migrations
                     b.Property<decimal>("BasePrice")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("Brand")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -304,6 +312,13 @@ namespace MercuryOMS.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("OriginalPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Slug")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -356,11 +371,18 @@ namespace MercuryOMS.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Size")
+                        .HasColumnType("text");
 
                     b.Property<string>("Sku")
                         .IsRequired()
@@ -801,11 +823,15 @@ namespace MercuryOMS.Infrastructure.Migrations
 
             modelBuilder.Entity("MercuryOMS.Domain.Entities.InventoryLog", b =>
                 {
-                    b.HasOne("Inventory", null)
+                    b.HasOne("MercuryOMS.Domain.Entities.Inventory", null)
                         .WithMany()
                         .HasForeignKey("InventoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("MercuryOMS.Domain.Entities.Inventory", null)
+                        .WithMany("Logs")
+                        .HasForeignKey("InventoryId1");
                 });
 
             modelBuilder.Entity("MercuryOMS.Domain.Entities.OrderItem", b =>
@@ -943,6 +969,11 @@ namespace MercuryOMS.Infrastructure.Migrations
             modelBuilder.Entity("Cart", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("MercuryOMS.Domain.Entities.Inventory", b =>
+                {
+                    b.Navigation("Logs");
                 });
 
             modelBuilder.Entity("MercuryOMS.Domain.Entities.Order", b =>

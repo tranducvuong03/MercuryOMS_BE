@@ -1,4 +1,5 @@
 ﻿using MercuryOMS.Domain.Commons;
+using MercuryOMS.Domain.Exceptions;
 
 namespace MercuryOMS.Domain.Entities
 {
@@ -27,10 +28,10 @@ namespace MercuryOMS.Domain.Entities
         public void SetName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Category name cannot be empty.");
+                throw new DomainException("Category name cannot be empty.");
 
             if (name.Length > 200)
-                throw new ArgumentException("Category name is too long.");
+                throw new DomainException("Category name is too long.");
 
             Name = name;
         }

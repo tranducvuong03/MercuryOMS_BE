@@ -1,11 +1,12 @@
 ﻿using MercuryOMS.Domain.Commons;
 using MercuryOMS.Domain.Enums;
+using MercuryOMS.Domain.Exceptions;
 
 namespace MercuryOMS.Domain.Entities
 {
     public class Inventory : AggregateRoot, IAuditableUser
     {
-        public Guid ProductId { get; private set; }
+        public Guid VariantId { get; private set; }
 
         public int Available { get; private set; }
         public int Reserved { get; private set; }
@@ -18,16 +19,16 @@ namespace MercuryOMS.Domain.Entities
 
         private Inventory() { }
 
-        public Inventory(Guid productId, int initialQuantity)
+        public Inventory(Guid variantId, int initialQuantity)
         {
-            if (productId == Guid.Empty)
-                throw new ArgumentException("ProductId không hợp lệ.");
+            if (variantId == Guid.Empty)
+                throw new DomainException("VariantId không hợp lệ.");
 
             if (initialQuantity < 0)
-                throw new ArgumentException("Số lượng ban đầu không được âm.");
+                throw new DomainException("Số lượng ban đầu không được âm.");
 
             Id = Guid.NewGuid();
-            ProductId = productId;
+            VariantId = variantId;
             Available = initialQuantity;
             Reserved = 0;
 
@@ -38,10 +39,10 @@ namespace MercuryOMS.Domain.Entities
         public void Reserve(int quantity, Guid? referenceId = null)
         {
             if (quantity <= 0)
-                throw new ArgumentException("Số lượng phải lớn hơn 0.");
+                throw new DomainException("Số lượng phải lớn hơn 0.");
 
             if (Available < quantity)
-                throw new ArgumentException("Không đủ hàng trong kho.");
+                throw new DomainException("Không đủ hàng trong kho.");
 
             Available -= quantity;
             Reserved += quantity;
@@ -53,10 +54,10 @@ namespace MercuryOMS.Domain.Entities
         public void Commit(int quantity, Guid? referenceId = null)
         {
             if (quantity <= 0)
-                throw new ArgumentException("Số lượng phải lớn hơn 0.");
+                throw new DomainException("Số lượng phải lớn hơn 0.");
 
             if (Reserved < quantity)
-                throw new ArgumentException("Số lượng xác nhận vượt quá hàng đã giữ.");
+                throw new DomainException("Số lượng xác nhận vượt quá hàng đã giữ.");
 
             Reserved -= quantity;
 
@@ -67,10 +68,10 @@ namespace MercuryOMS.Domain.Entities
         public void Release(int quantity, Guid? referenceId = null)
         {
             if (quantity <= 0)
-                throw new ArgumentException("Số lượng phải lớn hơn 0.");
+                throw new DomainException("Số lượng phải lớn hơn 0.");
 
             if (Reserved < quantity)
-                throw new ArgumentException("Số lượng hoàn trả vượt quá hàng đã giữ.");
+                throw new DomainException("Số lượng hoàn trả vượt quá hàng đã giữ.");
 
             Reserved -= quantity;
             Available += quantity;
@@ -82,7 +83,7 @@ namespace MercuryOMS.Domain.Entities
         public void StockIn(int quantity, Guid? referenceId = null)
         {
             if (quantity <= 0)
-                throw new ArgumentException("Số lượng phải lớn hơn 0.");
+                throw new DomainException("Số lượng phải lớn hơn 0.");
 
             Available += quantity;
 
@@ -93,7 +94,7 @@ namespace MercuryOMS.Domain.Entities
         public void Adjust(int quantity, Guid? referenceId = null)
         {
             if (quantity == 0)
-                throw new ArgumentException("Số lượng điều chỉnh phải khác 0.");
+                throw new DomainException("Số lượng điều chỉnh phải khác 0.");
 
             Available += quantity;
 

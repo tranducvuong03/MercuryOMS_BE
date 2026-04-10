@@ -1,4 +1,5 @@
 ﻿using MercuryOMS.Domain.Commons;
+using MercuryOMS.Domain.Exceptions;
 
 namespace MercuryOMS.Domain.Entities
 {
@@ -16,7 +17,7 @@ namespace MercuryOMS.Domain.Entities
 
         public IReadOnlyCollection<SellerProduct> Products => _products.AsReadOnly();
 
-        private Seller() { } // EF Core
+        private Seller() { }
 
         public Seller(string name)
         {
@@ -27,11 +28,10 @@ namespace MercuryOMS.Domain.Entities
             Balance = new SellerBalance(Id);
         }
 
-        // -------- Core behavior --------
         public void SetName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Seller name is required.");
+                throw new DomainException("Tên người bán không được để trống.");
 
             Name = name.Trim();
         }
@@ -39,11 +39,10 @@ namespace MercuryOMS.Domain.Entities
         public void Activate() => IsActive = true;
         public void Deactivate() => IsActive = false;
 
-        // -------- Product management --------
         public void AddProduct(Guid productId, decimal commissionRate)
         {
             if (commissionRate < 0 || commissionRate > 1)
-                throw new ArgumentException("Commission rate must be between 0 and 1.");
+                throw new DomainException("Tỷ lệ hoa hồng phải nằm trong khoảng từ 0 đến 1.");
 
             if (_products.Any(x => x.ProductId == productId))
                 return;
@@ -58,7 +57,6 @@ namespace MercuryOMS.Domain.Entities
                 _products.Remove(sp);
         }
 
-        // -------- Balance behavior --------
         public void Credit(decimal amount) => Balance.Credit(amount);
         public void Debit(decimal amount) => Balance.Debit(amount);
     }

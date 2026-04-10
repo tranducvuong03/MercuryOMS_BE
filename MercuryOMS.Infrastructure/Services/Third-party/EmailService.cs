@@ -17,7 +17,7 @@ namespace MercuryOMS.Infrastructure.Services
         public async Task SendAsync(string to, string subject, string body)
         {
             var smtpHost = _config["Email:SmtpHost"];
-            var smtpPort = int.Parse(_config["Email:SmtpPort"]);
+            var smtpPort = int.Parse(_config["Email:SmtpPort"]); // lỗi
             var username = _config["Email:Username"];
             var password = _config["Email:Password"];
 

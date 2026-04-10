@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 namespace MercuryOMS.Application.Features
 {
     public record ReserveInventoryCommand(
-        Guid ProductId,
-        int Quantity,
-        Guid ReferenceId
-    ) : IRequest<Result>;
+    Guid VariantId,
+    int Quantity,
+    Guid ReferenceId
+) : IRequest<Result>;
 
     public class ReserveInventoryHandler : IRequestHandler<ReserveInventoryCommand, Result>
     {
@@ -24,15 +24,25 @@ namespace MercuryOMS.Application.Features
 
         public async Task<Result> Handle(ReserveInventoryCommand request, CancellationToken ct)
         {
+            if (request.Quantity <= 0)
+                return Result.Failure("Quantity phải > 0");
+
             var repo = _unitOfWork.GetRepository<Inventory>();
 
             var inventory = await repo.Query
-                .FirstOrDefaultAsync(x => x.ProductId == request.ProductId, ct);
+                .FirstOrDefaultAsync(x => x.VariantId == request.VariantId, ct);
 
             if (inventory == null)
                 return Result.Failure(Message.InventoryNotFound);
 
-            inventory.Reserve(request.Quantity, request.ReferenceId);
+            try
+            {
+                inventory.Reserve(request.Quantity, request.ReferenceId);
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure(ex.Message);
+            }
 
             await _unitOfWork.SaveChangesAsync(ct);
 

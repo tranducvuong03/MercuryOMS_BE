@@ -6,4 +6,7 @@
     <Project Path="MercuryOMS.Infrastructure/MercuryOMS.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/" />
+  <Folder Name="/worker-service/">
+    <Project Path="MercuryOMS.Worker/MercuryOMS.Worker.csproj" Id="90c8e29e-bad2-4f12-833b-fa96e3a5bc6d" />
+  </Folder>
 </Solution>

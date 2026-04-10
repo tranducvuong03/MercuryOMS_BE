@@ -1,5 +1,6 @@
 ﻿using MercuryOMS.Domain.Commons;
 using MercuryOMS.Domain.Entities;
+using MercuryOMS.Domain.Exceptions; // thêm namespace này
 
 public class Cart : AggregateRoot, IAuditableUser
 {
@@ -24,7 +25,7 @@ public class Cart : AggregateRoot, IAuditableUser
     public void AddItem(Guid productId, int quantity)
     {
         if (quantity <= 0)
-            throw new ArgumentException("Số lượng phải lớn hơn 0.");
+            throw new DomainException("Số lượng phải lớn hơn 0.");
 
         var item = _items.FirstOrDefault(i => i.ProductId == productId);
 
@@ -36,6 +37,9 @@ public class Cart : AggregateRoot, IAuditableUser
 
     public void UpdateQuantity(Guid productId, int quantity)
     {
+        if (quantity <= 0)
+            throw new DomainException("Số lượng phải lớn hơn 0.");
+
         var item = GetItem(productId);
         item.SetQuantity(quantity);
     }
@@ -54,8 +58,9 @@ public class Cart : AggregateRoot, IAuditableUser
     private CartItem GetItem(Guid productId)
     {
         var item = _items.FirstOrDefault(i => i.ProductId == productId);
+
         if (item == null)
-            throw new ArgumentException("Không tìm thấy hàng trong giỏ.");
+            throw new DomainException("Không tìm thấy sản phẩm trong giỏ.");
 
         return item;
     }

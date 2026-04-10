@@ -1,4 +1,5 @@
 ﻿using MercuryOMS.Domain.Commons;
+using MercuryOMS.Domain.Exceptions;
 
 namespace MercuryOMS.Domain.Entities
 {
@@ -27,7 +28,7 @@ namespace MercuryOMS.Domain.Entities
         internal void SetStock(int stock)
         {
             if (stock < 0)
-                throw new ArgumentException("Hàng còn lại không được âm.");
+                throw new DomainException("Hàng còn lại không được âm.");
 
             Stock = stock;
         }

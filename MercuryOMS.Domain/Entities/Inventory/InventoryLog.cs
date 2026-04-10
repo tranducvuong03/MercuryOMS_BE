@@ -1,5 +1,6 @@
 ﻿using MercuryOMS.Domain.Commons;
 using MercuryOMS.Domain.Enums;
+using MercuryOMS.Domain.Exceptions;
 
 namespace MercuryOMS.Domain.Entities
 {
@@ -23,7 +24,7 @@ namespace MercuryOMS.Domain.Entities
             Guid? referenceId = null)
         {
             if (quantity <= 0)
-                throw new ArgumentException("Số lượng phải lớn hơn 0.");
+                throw new DomainException("Số lượng phải lớn hơn 0.");
 
             Id = Guid.NewGuid();
             InventoryId = inventoryId;

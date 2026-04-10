@@ -59,10 +59,10 @@ namespace MercuryOMS.Infrastructure.Data.Interceptors
                     if (entry.State == EntityState.Added)
                     {
                         if (string.IsNullOrEmpty(userEntity.CreatedBy))
-                            userEntity.CreatedBy = userId;
+                            userEntity.CreatedBy = userId.ToString();
                     }
 
-                    userEntity.LastModifiedBy = userId;
+                    userEntity.LastModifiedBy = userId.ToString();
                 }
             }
         }

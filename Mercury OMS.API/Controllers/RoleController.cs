@@ -4,52 +4,55 @@ using MercuryOMS.Application.Features.Roles.Commands;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[ApiController]
-[Route("api/roles")]
-[Authorize]
-public class RoleController : ControllerBase
+namespace MercuryOMS.API.Controllers
 {
-    private readonly IMediator _mediator;
-
-    public RoleController(IMediator mediator)
+    [ApiController]
+    [Route("api/roles")]
+    [Authorize]
+    public class RoleController : ControllerBase
     {
-        _mediator = mediator;
-    }
+        private readonly IMediator _mediator;
 
-    [HttpPost]
-    public async Task<IActionResult> Create(CreateRoleCommand command, CancellationToken ct)
-    {
-        var result = await _mediator.Send(command, ct);
-        if (!result.IsSuccess)
-            return BadRequest(result);
+        public RoleController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
-        return Ok();
-    }
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateRoleCommand command, CancellationToken ct)
+        {
+            var result = await _mediator.Send(command, ct);
+            if (!result.IsSuccess)
+                return BadRequest(result);
 
-    [HttpDelete]
-    public async Task<IActionResult> Delete([FromQuery] string name, CancellationToken ct)
-    {
-        var result = await _mediator.Send(new DeleteRoleCommand(name), ct);
-        if (!result.IsSuccess)
-            return BadRequest(result);
+            return Ok();
+        }
 
-        return Ok(result);
-    }
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromQuery] string name, CancellationToken ct)
+        {
+            var result = await _mediator.Send(new DeleteRoleCommand(name), ct);
+            if (!result.IsSuccess)
+                return BadRequest(result);
 
-    [HttpPut]
-    public async Task<IActionResult> Update(UpdateRoleCommand command, CancellationToken ct)
-    {
-        var result = await _mediator.Send(command, ct);
-        if (!result.IsSuccess)
-            return BadRequest(result);
+            return Ok(result);
+        }
 
-        return Ok(result);
-    }
+        [HttpPut]
+        public async Task<IActionResult> Update(UpdateRoleCommand command, CancellationToken ct)
+        {
+            var result = await _mediator.Send(command, ct);
+            if (!result.IsSuccess)
+                return BadRequest(result);
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken ct)
-    {
-        var result = await _mediator.Send(new GetAllRolesQuery(), ct);
-        return Ok(result);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll(CancellationToken ct)
+        {
+            var result = await _mediator.Send(new GetAllRolesQuery(), ct);
+            return Ok(result);
+        }
     }
 }

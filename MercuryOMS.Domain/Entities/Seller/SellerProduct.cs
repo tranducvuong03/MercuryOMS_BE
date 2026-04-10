@@ -1,4 +1,6 @@
-﻿namespace MercuryOMS.Domain.Entities
+﻿using MercuryOMS.Domain.Exceptions;
+
+namespace MercuryOMS.Domain.Entities
 {
     public class SellerProduct
     {
@@ -27,7 +29,7 @@
         private static void ValidateRate(decimal rate)
         {
             if (rate < 0 || rate > 100)
-                throw new ArgumentException("Commission rate must be between 0 and 100.");
+                throw new DomainException("Tỷ lệ hoa hồng phải nằm trong khoảng từ 0 đến 100.");
         }
     }
 }

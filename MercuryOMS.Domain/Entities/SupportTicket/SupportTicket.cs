@@ -1,5 +1,6 @@
 ﻿using MercuryOMS.Domain.Commons;
 using MercuryOMS.Domain.Enums;
+using MercuryOMS.Domain.Exceptions;
 
 namespace MercuryOMS.Domain.Entities
 {
@@ -25,7 +26,7 @@ namespace MercuryOMS.Domain.Entities
         public SupportTicket(Guid createdByUserId, string title, string description)
         {
             if (string.IsNullOrWhiteSpace(title))
-                throw new ArgumentException("Title is required.");
+                throw new DomainException("Tiêu đề không được để trống.");
 
             Id = Guid.NewGuid();
             CreatedByUserId = createdByUserId;
@@ -39,7 +40,7 @@ namespace MercuryOMS.Domain.Entities
         public void AssignStaff(Guid staffId)
         {
             if (Status == TicketStatus.Closed)
-                throw new InvalidOperationException("Ticket is closed.");
+                throw new DomainException("Phiếu hỗ trợ đã được đóng.");
 
             AssignedStaffId = staffId;
             Status = TicketStatus.InProgress;
@@ -48,10 +49,10 @@ namespace MercuryOMS.Domain.Entities
         public void AddMessage(Guid senderId, string message)
         {
             if (Status == TicketStatus.Closed)
-                throw new InvalidOperationException("Ticket is closed.");
+                throw new DomainException("Phiếu hỗ trợ đã được đóng.");
 
             if (string.IsNullOrWhiteSpace(message))
-                throw new ArgumentException("Message is required.");
+                throw new DomainException("Nội dung tin nhắn không được để trống.");
 
             _messages.Add(new TicketMessage(Id, senderId, message));
         }
@@ -59,7 +60,7 @@ namespace MercuryOMS.Domain.Entities
         public void Close(Guid staffId)
         {
             if (Status == TicketStatus.Closed)
-                throw new InvalidOperationException("Ticket already closed.");
+                throw new DomainException("Phiếu hỗ trợ đã được đóng trước đó.");
 
             AssignedStaffId ??= staffId;
             Status = TicketStatus.Closed;

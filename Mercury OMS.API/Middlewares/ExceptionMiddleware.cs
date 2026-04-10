@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
-using System.Net;
-using System.Text.Json;
+using MercuryOMS.Domain.Exceptions;
 
 namespace MercuryOMS.API.Middlewares
 {
@@ -19,19 +18,40 @@ namespace MercuryOMS.API.Middlewares
             {
                 await _next(context);
             }
-            catch (ValidationException ex)
+            catch (ValidationException ex) // xử lý lỗi validation từ FluentValidation
             {
-                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                context.Response.StatusCode = 400;
 
                 var errors = ex.Errors.Select(x => x.ErrorMessage);
 
-                var response = JsonSerializer.Serialize(new
+                await context.Response.WriteAsJsonAsync(new
                 {
                     success = false,
+                    errorCode = "VALIDATION_ERROR",
                     errors
                 });
+            }
+            catch (AppException ex) // xử lý custom exceptions
+            {
+                context.Response.StatusCode = ex.StatusCode;
 
-                await context.Response.WriteAsync(response);
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    success = false,
+                    errorCode = ex.ErrorCode,
+                    message = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 500;
+
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    success = false,
+                    errorCode = "INTERNAL_ERROR",
+                    message = "Internal Server Error"
+                });
             }
         }
     }

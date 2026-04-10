@@ -3,39 +3,42 @@ using MercuryOMS.Application.Features;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Route("api/categories")]
-[ApiController]
-[Authorize]
-public class CategoriesController : ControllerBase
+namespace MercuryOMS.API.Controllers
 {
-    private readonly IMediator _mediator;
-
-    public CategoriesController(IMediator mediator)
+    [Route("api/categories")]
+    [ApiController]
+    [Authorize]
+    public class CategoriesController : ControllerBase
     {
-        _mediator = mediator;
-    }
+        private readonly IMediator _mediator;
 
-    [HttpPost]
-    public async Task<IActionResult> CreateCategory(
-        [FromBody] CreateCategoryCommand command,
-        CancellationToken cancellationToken)
-    {
-        var categoryId = await _mediator.Send(command, cancellationToken);
-        return CreatedAtAction(
-            nameof(Get),
-            new { id = categoryId },
-            null);
-    }
+        public CategoriesController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
-    [HttpGet]
-    public async Task<IActionResult> Get()
-    {
-        return Ok(await _mediator.Send(new GetAllCategoryQuery()));
-    }
+        [HttpPost]
+        public async Task<IActionResult> CreateCategory(
+            [FromBody] CreateCategoryCommand command,
+            CancellationToken cancellationToken)
+        {
+            var categoryId = await _mediator.Send(command, cancellationToken);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id = categoryId },
+                null);
+        }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(Guid id)
-    {
-        return Ok(await _mediator.Send(new GetByIdQuery(id)));
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            return Ok(await _mediator.Send(new GetAllCategoryQuery()));
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            return Ok(await _mediator.Send(new GetByIdQuery(id)));
+        }
     }
 }

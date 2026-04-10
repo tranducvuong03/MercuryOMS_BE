@@ -30,6 +30,7 @@ namespace MercuryOMS.Infrastructure
             services.AddJwt(configuration);
             services.AddExternal(configuration);
             services.AddRedis(configuration);
+            services.AddRabbitMq();
             return services;
         }
 
@@ -117,6 +118,13 @@ namespace MercuryOMS.Infrastructure
             return services;
         }
 
+        private static IServiceCollection AddRabbitMq(
+            this IServiceCollection services)
+        {
+            services.AddScoped<IMessageBus, RabbitMqService>();
+            return services;
+        }
+
         private static IServiceCollection AddRepository(
             this IServiceCollection services)
         {
@@ -136,6 +144,11 @@ namespace MercuryOMS.Infrastructure
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPaymentFactory, PaymentFactory>();
+            services.AddScoped<IExternalAuthService, ExternalAuthService>();
+            services.AddScoped<IPaymentStrategyService, CodPaymentService>();
+            services.AddScoped<IPaymentStrategyService, VnPayPaymentService>();
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<ApplicationDbContext>()

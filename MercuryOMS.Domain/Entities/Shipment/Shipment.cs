@@ -1,5 +1,6 @@
 ﻿using MercuryOMS.Domain.Commons;
 using MercuryOMS.Domain.Enums;
+using MercuryOMS.Domain.Exceptions;
 
 namespace MercuryOMS.Domain.Entities
 {
@@ -42,7 +43,7 @@ namespace MercuryOMS.Domain.Entities
         public void AssignCarrier(string carrier, string trackingCode)
         {
             if (Status != ShipmentStatus.Pending && Status != ShipmentStatus.Ready)
-                throw new InvalidOperationException("Shipment cannot be assigned.");
+                throw new DomainException("Không thể gán đơn vị vận chuyển cho trạng thái hiện tại.");
 
             Carrier = carrier;
             TrackingCode = trackingCode;
@@ -52,7 +53,7 @@ namespace MercuryOMS.Domain.Entities
         public void MarkShipping()
         {
             if (Status != ShipmentStatus.Ready)
-                throw new InvalidOperationException("Shipment is not ready.");
+                throw new DomainException("Đơn hàng chưa sẵn sàng để giao.");
 
             Status = ShipmentStatus.Shipping;
             ShippedAt = DateTime.UtcNow;
@@ -61,7 +62,7 @@ namespace MercuryOMS.Domain.Entities
         public void MarkDelivered()
         {
             if (Status != ShipmentStatus.Shipping)
-                throw new InvalidOperationException("Shipment is not shipping.");
+                throw new DomainException("Đơn hàng chưa ở trạng thái đang giao.");
 
             Status = ShipmentStatus.Delivered;
             DeliveredAt = DateTime.UtcNow;
@@ -70,7 +71,7 @@ namespace MercuryOMS.Domain.Entities
         public void MarkFailed()
         {
             if (Status != ShipmentStatus.Shipping)
-                throw new InvalidOperationException("Shipment is not shipping.");
+                throw new DomainException("Đơn hàng chưa ở trạng thái đang giao.");
 
             Status = ShipmentStatus.Failed;
         }
@@ -78,7 +79,7 @@ namespace MercuryOMS.Domain.Entities
         public void Cancel()
         {
             if (Status == ShipmentStatus.Delivered)
-                throw new InvalidOperationException("Delivered shipment cannot be cancelled.");
+                throw new DomainException("Đơn hàng đã giao không thể hủy.");
 
             Status = ShipmentStatus.Cancelled;
         }

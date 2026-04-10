@@ -1,4 +1,5 @@
 ﻿using MercuryOMS.Domain.Commons;
+using MercuryOMS.Domain.Exceptions;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -15,7 +16,7 @@ namespace MercuryOMS.Domain.Entities
         public string? Description { get; private set; }
 
         public decimal BasePrice { get; private set; }
-        public decimal? OriginalPrice { get; private set; }
+        public decimal? OriginalPrice { get; private set; } // giá trước khi giảm
 
         public bool IsActive { get; private set; }
         public string? Brand { get; private set; }
@@ -43,7 +44,7 @@ namespace MercuryOMS.Domain.Entities
         public void SetName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Tên sản phẩm là bắt buộc.");
+                throw new DomainException("Tên sản phẩm là bắt buộc.");
 
             Name = name.Trim();
         }
@@ -61,7 +62,7 @@ namespace MercuryOMS.Domain.Entities
         public void SetBasePrice(decimal price)
         {
             if (price <= 0)
-                throw new ArgumentException("Giá sản phẩm phải lớn hơn 0.");
+                throw new DomainException("Giá sản phẩm phải lớn hơn 0.");
 
             BasePrice = price;
         }
@@ -69,7 +70,7 @@ namespace MercuryOMS.Domain.Entities
         public void SetOriginalPrice(decimal? price)
         {
             if (price.HasValue && price <= 0)
-                throw new ArgumentException("Giá gốc phải lớn hơn 0.");
+                throw new DomainException("Giá gốc phải lớn hơn 0.");
 
             OriginalPrice = price;
         }
@@ -77,7 +78,7 @@ namespace MercuryOMS.Domain.Entities
         public void SetBrand(string brand)
         {
             if (string.IsNullOrWhiteSpace(brand))
-                throw new ArgumentException("Thương hiệu không hợp lệ.");
+                throw new DomainException("Thương hiệu không hợp lệ.");
 
             Brand = brand.Trim();
         }
@@ -103,10 +104,10 @@ namespace MercuryOMS.Domain.Entities
         public void AddImage(string url, bool isPrimary = false)
         {
             if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentException("Đường dẫn ảnh là bắt buộc.");
+                throw new DomainException("Đường dẫn ảnh là bắt buộc.");
 
             if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
-                throw new ArgumentException("URL ảnh không hợp lệ.");
+                throw new DomainException("URL ảnh không hợp lệ.");
 
             if (isPrimary)
             {
@@ -127,16 +128,16 @@ namespace MercuryOMS.Domain.Entities
         public void AddVariant(string sku, decimal price, string color, string? size = null)
         {
             if (string.IsNullOrWhiteSpace(sku))
-                throw new ArgumentException("SKU là bắt buộc.");
+                throw new DomainException("SKU là bắt buộc.");
 
             if (price <= 0)
-                throw new ArgumentException("Giá biến thể phải lớn hơn 0.");
+                throw new DomainException("Giá biến thể phải lớn hơn 0.");
 
             if (string.IsNullOrWhiteSpace(color))
-                throw new ArgumentException("Màu sắc là bắt buộc.");
+                throw new DomainException("Màu sắc là bắt buộc.");
 
             if (_variants.Any(x => x.Sku == sku))
-                throw new ArgumentException("SKU đã tồn tại.");
+                throw new DomainException("SKU đã tồn tại.");
 
             _variants.Add(new ProductVariant(Id, sku, price, color, size));
         }
@@ -145,7 +146,7 @@ namespace MercuryOMS.Domain.Entities
         {
             var variant = _variants.FirstOrDefault(x => x.Id == variantId);
             if (variant == null)
-                throw new ArgumentException("Không tìm thấy biến thể sản phẩm.");
+                throw new DomainException("Không tìm thấy biến thể sản phẩm.");
 
             return variant;
         }

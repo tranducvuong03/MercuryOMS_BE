@@ -77,11 +77,11 @@ namespace MercuryOMS.Application.Features
 
         private static void HandleImages(Product product, List<string>? imageUrls)
         {
-            if (imageUrls == null) return;
+            if (imageUrls == null || !imageUrls.Any()) return;
 
-            foreach (var url in imageUrls)
+            for (int i = 0; i < imageUrls.Count; i++)
             {
-                product.AddImage(url);
+                product.AddImage(imageUrls[i], isPrimary: i == 0);
             }
         }
 
@@ -91,7 +91,7 @@ namespace MercuryOMS.Application.Features
 
             foreach (var v in variants)
             {
-                product.AddVariant(v.Sku, v.Price, v.Stock);
+                product.AddVariant(v.Sku, v.Price, v.Color, v.Size);
             }
         }
 

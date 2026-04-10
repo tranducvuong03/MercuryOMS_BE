@@ -4,6 +4,7 @@ using MercuryOMS.Domain.Constants;
 using MercuryOMS.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using System.Security.Claims;
 
 namespace MercuryOMS.Infrastructure.Services
 {
@@ -38,19 +39,23 @@ namespace MercuryOMS.Infrastructure.Services
             if (user == null)
                 return Result<string>.Failure(Message.AuthEmailNotFound);
 
-            var result = await _signInManager.CheckPasswordSignInAsync(
-                user, password, false);
+            var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
 
-            if (result.IsLockedOut) return Result<string>.Failure(Message.AuthLockedOut);
-            if (result.IsNotAllowed) return Result<string>.Failure(Message.AuthNotAllowed);
-            if (!result.Succeeded) return Result<string>.Failure(Message.AuthInvalidPassword);
+            if (result.IsLockedOut)
+                return Result<string>.Failure(Message.AuthLockedOut);
+
+            if (result.IsNotAllowed)
+                return Result<string>.Failure(Message.AuthNotAllowed);
+
+            if (!result.Succeeded)
+                return Result<string>.Failure(Message.AuthInvalidPassword);
 
             var token = await _jwtService.GenerateTokenAsync(user);
 
             return Result<string>.Success(token);
         }
 
-        public async Task<Result<string>> ExternalLoginAsync()
+        public async Task<Result<string>> ExternalLoginCallbackAsync()
         {
             var info = await _signInManager.GetExternalLoginInfoAsync();
 
@@ -66,11 +71,13 @@ namespace MercuryOMS.Infrastructure.Services
 
             if (signInResult.Succeeded)
             {
-                user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                user = await _userManager.FindByLoginAsync(
+                    info.LoginProvider,
+                    info.ProviderKey);
             }
             else
             {
-                var email = info.Principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                var email = info.Principal.FindFirst(ClaimTypes.Email)?.Value;
 
                 if (email == null)
                     return Result<string>.Failure(Message.ExternalEmailNotFound);
@@ -81,7 +88,7 @@ namespace MercuryOMS.Infrastructure.Services
                 {
                     user = new ApplicationUser
                     {
-                        FullName = info.Principal.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? email,
+                        FullName = info.Principal.FindFirst(ClaimTypes.Name)?.Value ?? email,
                         Email = email,
                         UserName = email,
                         EmailConfirmed = true
@@ -99,16 +106,11 @@ namespace MercuryOMS.Infrastructure.Services
             return Result<string>.Success(token);
         }
 
-        public async Task<string> GetExternalLoginUrlAsync(string provider)
-        {
-            var redirectUrl = $"{_configuration["App:BaseUrl"]}/api/auth/external-callback";
-
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-
-            return properties.RedirectUri!;
-        }
-
-        public async Task<Result> RegisterAsync(string email, string password, string fullName, CancellationToken ct)
+        public async Task<Result> RegisterAsync(
+            string email,
+            string password,
+            string fullName,
+            CancellationToken ct)
         {
             var existing = await _userManager.FindByEmailAsync(email);
             if (existing != null)
@@ -138,20 +140,6 @@ namespace MercuryOMS.Infrastructure.Services
             return Result.Success(Message.RegisterSuccess);
         }
 
-        public async Task<Result> ResendConfirmEmailAsync(string email, CancellationToken ct)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-                return Result.Failure(Message.AuthEmailNotFound);
-
-            if (user.EmailConfirmed)
-                return Result.Failure(Message.EmailAlreadyConfirmed);
-
-            await SendConfirmEmailAsync(user);
-
-            return Result.Success(Message.EmailConfirmSent);
-        }
-
         private async Task SendConfirmEmailAsync(ApplicationUser user)
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -163,7 +151,7 @@ namespace MercuryOMS.Infrastructure.Services
 
             await _emailService.SendAsync(
                 user.Email!,
-                "CONFIRM YOUR EMAIL",
+                "CONFIRM YOUR EMAIL - MercuryOMS",
                 EmailTemplates.ConfirmEmail(confirmLink));
         }
 
@@ -184,5 +172,18 @@ namespace MercuryOMS.Infrastructure.Services
             return Result.Success(Message.EmailConfirmed);
         }
 
+        public async Task<Result> ResendConfirmEmailAsync(string email, CancellationToken ct)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Result.Failure(Message.AuthEmailNotFound);
+
+            if (user.EmailConfirmed)
+                return Result.Failure(Message.EmailAlreadyConfirmed);
+
+            await SendConfirmEmailAsync(user);
+
+            return Result.Success(Message.EmailConfirmSent);
+        }
     }
 }

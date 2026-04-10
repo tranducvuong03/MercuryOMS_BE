@@ -118,14 +118,16 @@ namespace MercuryOMS.Infrastructure.Data
             {
                 entity.HasKey(i => i.Id);
 
-                entity.Property(i => i.ProductId).IsRequired();
+                entity.Property(i => i.VariantId)
+                      .IsRequired();
 
                 entity.HasMany<InventoryLog>()
                       .WithOne()
                       .HasForeignKey(il => il.InventoryId)
                       .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasIndex(i => i.ProductId).IsUnique();
+                entity.HasIndex(i => i.VariantId)
+                      .IsUnique();
             });
 
             builder.Entity<InventoryLog>(entity =>

@@ -1,5 +1,4 @@
-﻿
-using MediatR;
+﻿using MediatR;
 using MercuryOMS.Application.Commons;
 using MercuryOMS.Application.Interfaces;
 using MercuryOMS.Domain.Constants;
@@ -9,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MercuryOMS.Application.Features
 {
     public record ReleaseInventoryCommand(
-        Guid ProductId,
+        Guid VariantId,
         int Quantity,
         Guid ReferenceId
     ) : IRequest<Result>;
@@ -25,15 +24,32 @@ namespace MercuryOMS.Application.Features
 
         public async Task<Result> Handle(ReleaseInventoryCommand request, CancellationToken ct)
         {
+            if (request.VariantId == Guid.Empty)
+                return Result.Failure("VariantId không hợp lệ");
+
+            if (request.Quantity <= 0)
+                return Result.Failure("Quantity phải > 0");
+
             var repo = _unitOfWork.GetRepository<Inventory>();
 
             var inventory = await repo.Query
-                .FirstOrDefaultAsync(x => x.ProductId == request.ProductId, ct);
+                .FirstOrDefaultAsync(x => x.VariantId == request.VariantId, ct);
 
             if (inventory == null)
                 return Result.Failure(Message.InventoryNotFound);
 
-            inventory.Release(request.Quantity, request.ReferenceId);
+            try
+            {
+                inventory.Release(request.Quantity, request.ReferenceId);
+            }
+            catch (ArgumentException ex)
+            {
+                return Result.Failure(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Result.Failure(ex.Message);
+            }
 
             await _unitOfWork.SaveChangesAsync(ct);
 

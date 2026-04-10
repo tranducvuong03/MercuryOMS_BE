@@ -1,4 +1,5 @@
 ﻿using MercuryOMS.Domain.Commons;
+using MercuryOMS.Domain.Exceptions;
 
 namespace MercuryOMS.Domain.Entities
 {
@@ -11,10 +12,8 @@ namespace MercuryOMS.Domain.Entities
 
         internal CartItem(Guid productId, int quantity)
         {
-            if (quantity <= 0) 
-            {
-                throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
-            };
+            if (quantity <= 0)
+                throw new DomainException("Số lượng phải lớn hơn 0.");
 
             Id = Guid.NewGuid();
             ProductId = productId;
@@ -23,17 +22,16 @@ namespace MercuryOMS.Domain.Entities
 
         internal void SetQuantity(int quantity)
         {
-            if (quantity <= 0) 
-            {
-                throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
-            };
+            if (quantity <= 0)
+                throw new DomainException("Số lượng phải lớn hơn 0.");
+
             Quantity = quantity;
         }
 
         internal void Increase(int amount)
         {
             if (amount <= 0)
-                throw new ArgumentException("Increase amount must be greater than zero.");
+                throw new DomainException("Số lượng tăng phải lớn hơn 0.");
 
             Quantity += amount;
         }
@@ -41,13 +39,12 @@ namespace MercuryOMS.Domain.Entities
         internal void Decrease(int amount)
         {
             if (amount <= 0)
-                throw new ArgumentException("Decrease amount must be greater than zero.");
+                throw new DomainException("Số lượng giảm phải lớn hơn 0.");
 
             if (Quantity - amount <= 0)
-                throw new ArgumentException("Quantity cannot be zero or negative.");
+                throw new DomainException("Số lượng không thể nhỏ hơn hoặc bằng 0.");
 
             Quantity -= amount;
         }
-
     }
 }

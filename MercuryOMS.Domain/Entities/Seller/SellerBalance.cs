@@ -1,4 +1,6 @@
-﻿namespace MercuryOMS.Domain.Entities
+﻿using MercuryOMS.Domain.Exceptions;
+
+namespace MercuryOMS.Domain.Entities
 {
     public class SellerBalance
     {
@@ -16,7 +18,7 @@
         internal void Credit(decimal amount)
         {
             if (amount <= 0)
-                throw new ArgumentException("Amount must be greater than zero.");
+                throw new DomainException("Số tiền phải lớn hơn 0.");
 
             Amount += amount;
         }
@@ -24,10 +26,10 @@
         internal void Debit(decimal amount)
         {
             if (amount <= 0)
-                throw new ArgumentException("Amount must be greater than zero.");
+                throw new DomainException("Số tiền phải lớn hơn 0.");
 
             if (Amount < amount)
-                throw new InvalidOperationException("Insufficient seller balance.");
+                throw new DomainException("Số dư của người bán không đủ.");
 
             Amount -= amount;
         }

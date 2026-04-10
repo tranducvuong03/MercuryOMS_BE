@@ -92,7 +92,7 @@ namespace MercuryOMS.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
+                    VariantId = table.Column<Guid>(type: "uuid", nullable: false),
                     Available = table.Column<int>(type: "integer", nullable: false),
                     Reserved = table.Column<int>(type: "integer", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
@@ -142,9 +142,12 @@ namespace MercuryOMS.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
+                    Slug = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     BasePrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    OriginalPrice = table.Column<decimal>(type: "numeric", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Brand = table.Column<string>(type: "text", nullable: true),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -341,7 +344,8 @@ namespace MercuryOMS.Infrastructure.Migrations
                     Type = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     ReferenceId = table.Column<Guid>(type: "uuid", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    InventoryId1 = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -352,6 +356,11 @@ namespace MercuryOMS.Infrastructure.Migrations
                         principalTable: "Inventories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_InventoryLogs_Inventories_InventoryId1",
+                        column: x => x.InventoryId1,
+                        principalTable: "Inventories",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -472,7 +481,9 @@ namespace MercuryOMS.Infrastructure.Migrations
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
                     Sku = table.Column<string>(type: "text", nullable: false),
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
-                    Stock = table.Column<int>(type: "integer", nullable: false)
+                    Stock = table.Column<int>(type: "integer", nullable: false),
+                    Color = table.Column<string>(type: "text", nullable: false),
+                    Size = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -591,15 +602,20 @@ namespace MercuryOMS.Infrastructure.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Inventories_ProductId",
+                name: "IX_Inventories_VariantId",
                 table: "Inventories",
-                column: "ProductId",
+                column: "VariantId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryLogs_InventoryId",
                 table: "InventoryLogs",
                 column: "InventoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InventoryLogs_InventoryId1",
+                table: "InventoryLogs",
+                column: "InventoryId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_OrderId",

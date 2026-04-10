@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MercuryOMS.Application.Features
 {
     public record CommitInventoryCommand(
-        Guid ProductId,
+        Guid VariantId,
         int Quantity,
         Guid ReferenceId
     ) : IRequest<Result>;
@@ -27,12 +27,19 @@ namespace MercuryOMS.Application.Features
             var repo = _unitOfWork.GetRepository<Inventory>();
 
             var inventory = await repo.Query
-                .FirstOrDefaultAsync(x => x.ProductId == request.ProductId, ct);
+                .FirstOrDefaultAsync(x => x.VariantId == request.VariantId, ct);
 
             if (inventory == null)
                 return Result.Failure(Message.InventoryNotFound);
 
-            inventory.Commit(request.Quantity, request.ReferenceId);
+            try
+            {
+                inventory.Commit(request.Quantity, request.ReferenceId);
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure(ex.Message);
+            }
 
             await _unitOfWork.SaveChangesAsync(ct);
 

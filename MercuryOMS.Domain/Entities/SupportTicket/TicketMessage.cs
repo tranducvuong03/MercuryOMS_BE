@@ -1,4 +1,5 @@
 ﻿using MercuryOMS.Domain.Commons;
+using MercuryOMS.Domain.Exceptions;
 
 namespace MercuryOMS.Domain.Entities
 {
@@ -17,7 +18,7 @@ namespace MercuryOMS.Domain.Entities
             string content)
         {
             if (string.IsNullOrWhiteSpace(content))
-                throw new ArgumentException("Message content is required.");
+                throw new DomainException("Nội dung tin nhắn không được để trống.");
 
             Id = Guid.NewGuid();
             TicketId = ticketId;
