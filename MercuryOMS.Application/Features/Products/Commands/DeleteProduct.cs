@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using MercuryOMS.Application.Commons;
-using MercuryOMS.Application.Interfaces;
+using MercuryOMS.Application.UOW;
 using MercuryOMS.Domain.Constants;
 using MercuryOMS.Domain.Entities;
 

@@ -4,10 +4,10 @@
     {
         public Guid Id { get; private set; }
         public string Type { get; private set; } = default!;
-        public string Payload { get; private set; } = default!;
-        public bool IsProcessed { get; private set; }
-        public DateTime OccurredOn { get; private set; }
-        public DateTime? ProcessedOn { get; private set; }
+        public string Payload { get; set; } = default!;
+        public bool IsProcessed { get; set; }
+        public DateTime OccurredOn { get; set; }
+        public DateTime? ProcessedOn { get; set; }
 
         private OutboxMessage() { }
 
@@ -17,6 +17,7 @@
             Type = type;
             Payload = payload;
             IsProcessed = false;
+            OccurredOn = DateTime.UtcNow;
         }
 
         public void MarkAsProcessed()

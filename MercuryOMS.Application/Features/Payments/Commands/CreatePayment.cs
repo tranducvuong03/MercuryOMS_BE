@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using MercuryOMS.Application.Commons;
-using MercuryOMS.Application.Interfaces;
+using MercuryOMS.Application.UOW;
 using MercuryOMS.Application.IServices;
 using MercuryOMS.Domain.Entities;
 using MercuryOMS.Domain.Enums;
@@ -32,7 +32,6 @@ namespace MercuryOMS.Application.Features
             CancellationToken ct)
         {
             var strategy = _factory.Get(request.Method.ToString());
-
             var payment = await strategy.CreatePaymentAsync(
                 request.OrderId,
                 request.Amount,

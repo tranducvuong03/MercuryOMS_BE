@@ -50,7 +50,7 @@ namespace MercuryOMS.API.Middlewares
                 {
                     success = false,
                     errorCode = "INTERNAL_ERROR",
-                    message = "Internal Server Error"
+                    message = ex.Message
                 });
             }
         }

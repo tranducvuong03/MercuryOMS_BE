@@ -1,28 +1,26 @@
 ﻿using MediatR;
-using MercuryOMS.Application.Interfaces;
 using MercuryOMS.Application.IServices;
 using MercuryOMS.Application.Models.Responses;
+using MercuryOMS.Application.UOW;
 using MercuryOMS.Domain.Constants;
 using MercuryOMS.Domain.Entities;
 using MercuryOMS.Domain.Events;
 using MercuryOMS.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace MercuryOMS.Application.Features
 {
     public class PaymentPaidEventHandler
         : INotificationHandler<PaymentPaidEvent>
     {
-        private readonly IMessageBus _bus;
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
 
         public PaymentPaidEventHandler(
-            IMessageBus bus,
             IUnitOfWork uow,
             IUserService userService)
         {
-            _bus = bus;
             _uow = uow;
             _userService = userService;
         }
@@ -41,14 +39,22 @@ namespace MercuryOMS.Application.Features
             if (user == null)
                 throw new NotFoundException(Message.UserNotFound);
 
-            await _bus.PublishAsync("payment.paid", new PaymentPaidMessage
+            var message = new PaymentPaidMessage
             {
                 PaymentId = e.PaymentId,
                 OrderId = e.OrderId,
                 Amount = e.Amount,
                 Email = user.Email,
                 FullName = user.FullName
-            });
+            };
+
+            var outbox = new OutboxMessage(
+                type: nameof(PaymentPaidMessage),
+                payload: JsonSerializer.Serialize<PaymentPaidMessage>(message)
+            );
+
+            await _uow.GetRepository<OutboxMessage>().AddAsync(outbox);
+
         }
     }
 }

@@ -3,32 +3,48 @@ using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 
-namespace MercuryOMS.Infrastructure.Services
+public class RabbitMqService : IMessageBus, IDisposable
 {
-    public class RabbitMqService : IMessageBus
+    private readonly IConnection _connection;
+    private readonly IModel _channel;
+
+    public RabbitMqService()
     {
-        private readonly ConnectionFactory _factory;
-
-        public RabbitMqService()
+        var factory = new ConnectionFactory
         {
-            _factory = new ConnectionFactory()
-            {
-                HostName = "localhost"
-            };
+            HostName = "localhost"
+        };
+
+        _connection = factory.CreateConnection();
+        _channel = _connection.CreateModel();
+    }
+
+    public Task PublishAsync<T>(string routingKey, T message)
+    {
+        byte[] body;
+
+        if (message is string str)
+        {
+            body = Encoding.UTF8.GetBytes(str);
+        }
+        else
+        {
+            body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
         }
 
-        public Task PublishAsync<T>(string queue, T message)
-        {
-            using var connection = _factory.CreateConnection();
-            using var channel = connection.CreateModel();
+        _channel.BasicPublish(
+            exchange: "",
+            routingKey: routingKey,
+            basicProperties: null,
+            body: body
+        );
 
-            channel.QueueDeclare(queue, true, false, false);
+        return Task.CompletedTask;
+    }
 
-            var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
-
-            channel.BasicPublish("", queue, null, body);
-
-            return Task.CompletedTask;
-        }
+    public void Dispose()
+    {
+        _channel?.Close();
+        _connection?.Close();
     }
 }

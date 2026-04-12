@@ -1,4 +1,4 @@
-﻿namespace MercuryOMS.Application.Interfaces
+﻿namespace MercuryOMS.Application.UOW
 {
     public interface IUnitOfWork
     {

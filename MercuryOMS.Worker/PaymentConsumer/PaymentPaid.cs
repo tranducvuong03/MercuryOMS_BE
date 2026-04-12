@@ -12,14 +12,20 @@ namespace MercuryOMS.Worker
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IConfiguration _configuration;
+
         private IConnection _connection;
         private IModel _channel;
 
-        public PaymentPaidConsumer(IServiceScopeFactory scopeFactory, IConfiguration configuration)
+        private const string QueueName = "payment.paid";
+
+        public PaymentPaidConsumer(
+            IServiceScopeFactory scopeFactory,
+            IConfiguration configuration)
         {
             _scopeFactory = scopeFactory;
+            _configuration = configuration;
 
-            var factory = new ConnectionFactory()
+            var factory = new ConnectionFactory
             {
                 HostName = "localhost"
             };
@@ -28,33 +34,41 @@ namespace MercuryOMS.Worker
             _channel = _connection.CreateModel();
 
             _channel.QueueDeclare(
-                queue: "payment.paid",
+                queue: QueueName,
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
-                arguments: null);
-            _configuration = configuration;
+                arguments: null
+            );
+
+            _channel.BasicQos(
+                prefetchSize: 0,
+                prefetchCount: 1,
+                global: false
+            );
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var consumer = new EventingBasicConsumer(_channel);
+            if (stoppingToken.IsCancellationRequested)
+                return Task.CompletedTask;
 
             consumer.Received += async (model, ea) =>
             {
                 try
                 {
-                    var body = ea.Body.ToArray();
-                    var json = Encoding.UTF8.GetString(body);
+                    var json = Encoding.UTF8.GetString(ea.Body.ToArray());
 
                     var message = JsonSerializer.Deserialize<PaymentPaidMessage>(json);
 
                     if (message == null)
-                        throw new Exception("Message deserialize failed");
+                        throw new Exception("Invalid message");
 
                     using var scope = _scopeFactory.CreateScope();
-                    var notificationService = scope.ServiceProvider
-                        .GetRequiredService<INotificationService>();
+
+                    var notificationService =
+                        scope.ServiceProvider.GetRequiredService<INotificationService>();
 
                     await notificationService.SendEmailAsync(
                         message.Email,
@@ -67,20 +81,29 @@ namespace MercuryOMS.Worker
                         )
                     );
 
-                    _channel.BasicAck(ea.DeliveryTag, multiple: false);
+                    _channel.BasicAck(ea.DeliveryTag, false);
                 }
-                catch (Exception ex)
+                catch
                 {
-                    _channel.BasicNack(ea.DeliveryTag, false, requeue: true);
+                    _channel.BasicNack(ea.DeliveryTag, false, requeue: false);
                 }
             };
 
             _channel.BasicConsume(
-                queue: "payment.paid",
+                queue: QueueName,
                 autoAck: false,
-                consumer: consumer);
+                consumer: consumer
+            );
 
             return Task.CompletedTask;
+        }
+
+        public override void Dispose()
+        {
+            _channel?.Close();
+            _connection?.Close();
+
+            base.Dispose();
         }
     }
 }

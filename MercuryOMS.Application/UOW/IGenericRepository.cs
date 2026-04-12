@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace MercuryOMS.Application.Interfaces
+namespace MercuryOMS.Application.UOW
 {
     public interface IGenericRepository<T> where T : class
     {

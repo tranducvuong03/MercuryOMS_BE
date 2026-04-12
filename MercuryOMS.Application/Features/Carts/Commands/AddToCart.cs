@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MercuryOMS.Application.Commons;
-using MercuryOMS.Application.Interfaces;
+using MercuryOMS.Application.UOW;
 using MercuryOMS.Domain.Constants;
 
 namespace MercuryOMS.Application.Features

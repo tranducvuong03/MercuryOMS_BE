@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using MercuryOMS.Application.Interfaces;
+using MercuryOMS.Application.UOW;
 using MercuryOMS.Domain.Commons;
 using MercuryOMS.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -35,28 +35,27 @@ namespace MercuryOMS.Infrastructure.Repositories
         public async Task<int> SaveChangesAsync(
             CancellationToken cancellationToken = default)
         {
-            var result = await _dbContext.SaveChangesAsync(cancellationToken);
-
             await DispatchDomainEvents();
+
+            var result = await _dbContext.SaveChangesAsync(cancellationToken);
 
             return result;
         }
 
         private async Task DispatchDomainEvents()
         {
-            var entities = _dbContext.ChangeTracker
+            var domainEntities = _dbContext.ChangeTracker
                 .Entries<AggregateRoot>()
                 .Where(x => x.Entity.DomainEvents.Any())
                 .ToList();
 
-            var events = entities
+            var domainEvents = domainEntities
                 .SelectMany(x => x.Entity.DomainEvents)
                 .ToList();
 
-            // clear trước khi chạy tránh duplicate
-            entities.ForEach(e => e.Entity.ClearDomainEvents());
+            domainEntities.ForEach(entity => entity.Entity.ClearDomainEvents());
 
-            foreach (var domainEvent in events)
+            foreach (var domainEvent in domainEvents)
             {
                 await _mediator.Publish(domainEvent);
             }
