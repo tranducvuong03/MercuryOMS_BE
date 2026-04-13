@@ -1,6 +1,4 @@
-using MercuryOMS.Application.IServices;
 using MercuryOMS.Infrastructure.Data;
-using MercuryOMS.Infrastructure.Services;
 using MercuryOMS.Worker;
 using MercuryOMS.Worker.OutboxProcessor;
 using Microsoft.EntityFrameworkCore;
@@ -18,13 +16,16 @@ builder.Services.AddHostedService<PaymentPaidConsumer>();
 builder.Services.AddHostedService<OutboxProcessor>();
 
 // Services
-builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddSingleton<IMessageBus, RabbitMqService>();
+builder.Services.AddWorker(builder.Configuration);
 
 builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("MercuryOMSDatabase"));
+});
+
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
 });
 
 var host = builder.Build();

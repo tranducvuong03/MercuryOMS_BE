@@ -6,7 +6,7 @@ namespace MercuryOMS.Domain.Entities
     public class OrderItem : BaseEntity
     {
         public Guid OrderId { get; private set; }
-        public Guid ProductId { get; private set; }
+        public Guid ProductVariantId { get; private set; }
 
         public int Quantity { get; private set; }
         public decimal UnitPrice { get; private set; }
@@ -15,17 +15,21 @@ namespace MercuryOMS.Domain.Entities
 
         private OrderItem() { }
 
-        internal OrderItem(Guid orderId, Guid productId, int quantity, decimal unitPrice)
+        internal OrderItem(
+            Guid orderId,
+            Guid productVariantId,
+            int quantity,
+            decimal unitPrice)
         {
             if (quantity <= 0)
-                throw new DomainException("Quantity must be greater than zero.");
+                throw new DomainException("Số lượng phải lớn hơn 0.");
 
             if (unitPrice < 0)
-                throw new DomainException("Unit price cannot be negative.");
+                throw new DomainException("Đơn giá không được âm.");
 
             Id = Guid.NewGuid();
             OrderId = orderId;
-            ProductId = productId;
+            ProductVariantId = productVariantId;
             Quantity = quantity;
             UnitPrice = unitPrice;
         }
@@ -33,7 +37,7 @@ namespace MercuryOMS.Domain.Entities
         internal void IncreaseQuantity(int quantity)
         {
             if (quantity <= 0)
-                throw new DomainException("Quantity must be greater than zero.");
+                throw new DomainException("Số lượng phải lớn hơn 0.");
 
             Quantity += quantity;
         }

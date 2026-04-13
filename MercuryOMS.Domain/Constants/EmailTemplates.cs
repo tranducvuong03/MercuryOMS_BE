@@ -121,9 +121,17 @@
                                         <td style='padding:36px 36px 28px; text-align:center;'>
 
                                             <!-- Icon check -->
-                                            <div style='width:56px; height:56px; border-radius:50%; background-color:#eaf3de; margin:0 auto 20px; display:flex; align-items:center; justify-content:center;'>
-                                                <img src='https://cdn-icons-png.flaticon.com/512/190/190411.png' width='28' height='28' alt='success' />
-                                            </div>
+                                            <table role='presentation' align='center' cellspacing='0' cellpadding='0' style='margin:0 auto 20px;'>
+                                                <tr>
+                                                    <td align='center'
+                                                        style='width:56px; height:56px; border-radius:50%; background-color:#eaf3de;'>
+                                                        <img src='https://cdn-icons-png.flaticon.com/512/190/190411.png'
+                                                             width='28' height='28'
+                                                             style='display:block; margin:0 auto;'
+                                                             alt='success' />
+                                                    </td>
+                                                </tr>
+                                            </table>
 
                                             <h2 style='margin:0 0 6px; font-size:20px; color:#1a1a1a;'>Thanh toán thành công</h2>
                                             <p style='margin:0 0 24px; font-size:14px; color:#64748b;'>Cảm ơn bạn đã tin tưởng MercuryOMS</p>

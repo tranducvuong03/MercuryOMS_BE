@@ -10,23 +10,19 @@ public class CurrentUserService : ICurrentUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    private ClaimsPrincipal User =>
-        _httpContextAccessor.HttpContext?.User
-        ?? throw new UnauthorizedAccessException("Không có HttpContext");
+    private ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
 
-    public Guid UserId
+    public Guid? UserId
     {
         get
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = _httpContextAccessor.HttpContext?.User
+                ?.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (string.IsNullOrEmpty(userId))
-                throw new UnauthorizedAccessException("User chưa đăng nhập");
+            if (Guid.TryParse(userId, out var guid))
+                return guid;
 
-            if (!Guid.TryParse(userId, out var guid))
-                throw new UnauthorizedAccessException("UserId không hợp lệ");
-
-            return guid;
+            return null;
         }
     }
 

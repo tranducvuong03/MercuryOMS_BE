@@ -1,5 +1,4 @@
 ﻿using MercuryOMS.Domain.Commons;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -40,10 +39,11 @@ namespace MercuryOMS.Infrastructure.Data.Interceptors
                             (e.State == EntityState.Added ||
                              e.State == EntityState.Modified));
 
+            // 👇 FIX: fallback
+            var userId = _currentUser.UserId?.ToString() ?? "system";
+
             foreach (var entry in entries)
             {
-                var userId = _currentUser.UserId;
-
                 if (entry.Entity is AuditableEntity entity)
                 {
                     if (entry.State == EntityState.Added)
@@ -59,10 +59,10 @@ namespace MercuryOMS.Infrastructure.Data.Interceptors
                     if (entry.State == EntityState.Added)
                     {
                         if (string.IsNullOrEmpty(userEntity.CreatedBy))
-                            userEntity.CreatedBy = userId.ToString();
+                            userEntity.CreatedBy = userId;
                     }
 
-                    userEntity.LastModifiedBy = userId.ToString();
+                    userEntity.LastModifiedBy = userId;
                 }
             }
         }

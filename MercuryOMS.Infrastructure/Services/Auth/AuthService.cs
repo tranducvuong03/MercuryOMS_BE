@@ -151,7 +151,7 @@ namespace MercuryOMS.Infrastructure.Services
 
             await _emailService.SendAsync(
                 user.Email!,
-                "CONFIRM YOUR EMAIL - MercuryOMS",
+                "[CONFIRM YOUR EMAIL] - MercuryOMS",
                 EmailTemplates.ConfirmEmail(confirmLink));
         }
 

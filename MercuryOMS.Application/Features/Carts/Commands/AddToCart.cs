@@ -29,13 +29,16 @@ namespace MercuryOMS.Application.Features
         {
             var userId = _currentUser.UserId;
 
+            if (userId == null)
+                throw new UnauthorizedAccessException("Người dùng chưa đăng nhập.");
+
             var cart = await _unitOfWork.GetRepository<Cart>().Query
                 .Include(c => c.Items)
-                .FirstOrDefaultAsync(c => c.UserId == userId, ct);
+                .FirstOrDefaultAsync(c => c.UserId == userId.Value, ct);
 
             if (cart is null)
             {
-                cart = new Cart(userId);
+                cart = new Cart(userId.Value);
                 await _unitOfWork.GetRepository<Cart>().AddAsync(cart, ct);
             }
 

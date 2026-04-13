@@ -158,12 +158,17 @@ namespace MercuryOMS.Infrastructure.Data
                 entity.HasKey(oi => oi.Id);
 
                 entity.Property(oi => oi.OrderId).IsRequired();
-                entity.Property(oi => oi.ProductId).IsRequired();
+                entity.Property(oi => oi.ProductVariantId).IsRequired();
                 entity.Property(oi => oi.Quantity).IsRequired();
-                entity.Property(oi => oi.UnitPrice).IsRequired();
+                entity.Property(oi => oi.UnitPrice)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
 
                 entity.HasIndex(oi => oi.OrderId);
-                entity.HasIndex(oi => oi.ProductId);
+                entity.HasIndex(oi => oi.ProductVariantId);
+
+                entity.HasIndex(oi => new { oi.OrderId, oi.ProductVariantId })
+                    .IsUnique();
             });
 
             builder.Entity<Payment>(entity =>

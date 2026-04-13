@@ -1,6 +1,5 @@
-﻿using MercuryOMS.Application.IServices;
-using MercuryOMS.Application.Models.Responses;
-using MercuryOMS.Domain.Constants;
+﻿using MercuryOMS.Application.Models.Responses;
+using MercuryOMS.Worker.PaymentConsumer;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -60,32 +59,24 @@ namespace MercuryOMS.Worker
                 {
                     var json = Encoding.UTF8.GetString(ea.Body.ToArray());
 
-                    var message = JsonSerializer.Deserialize<PaymentPaidMessage>(json);
-
-                    if (message == null)
-                        throw new Exception("Invalid message");
+                    var message = JsonSerializer.Deserialize<PaymentPaidMessage>(json)
+                                  ?? throw new Exception("Invalid message");
 
                     using var scope = _scopeFactory.CreateScope();
 
-                    var notificationService =
-                        scope.ServiceProvider.GetRequiredService<INotificationService>();
+                    var handlers = scope.ServiceProvider
+                        .GetServices<IPaymentPaidHandler>();
 
-                    await notificationService.SendEmailAsync(
-                        message.Email,
-                        "PAYMENT SUCCESSFUL - MercuryOMS",
-                        EmailTemplates.PaymentSuccess(
-                            message.FullName,
-                            message.OrderId.ToString(),
-                            message.Amount.ToString("N0"),
-                            $"{_configuration["App:FrontendUrl"]}/orders/{message.OrderId}"
-                        )
-                    );
+                    foreach (var handler in handlers)
+                    {
+                        await handler.HandleAsync(message);
+                    }
 
                     _channel.BasicAck(ea.DeliveryTag, false);
                 }
                 catch
                 {
-                    _channel.BasicNack(ea.DeliveryTag, false, requeue: false);
+                    _channel.BasicNack(ea.DeliveryTag, false, false);
                 }
             };
 

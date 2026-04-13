@@ -14,7 +14,7 @@ namespace MercuryOMS.Domain.Entities
 
         private Transaction() { }
 
-        internal Transaction(
+        public Transaction(
             Guid paymentId,
             Guid orderId,
             decimal amount,

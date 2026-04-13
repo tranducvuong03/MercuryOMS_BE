@@ -32,12 +32,11 @@ namespace MercuryOMS.Infrastructure.Repositories
             return (IGenericRepository<T>)_repositories[type];
         }
 
-        public async Task<int> SaveChangesAsync(
-            CancellationToken cancellationToken = default)
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            await DispatchDomainEvents();
-
             var result = await _dbContext.SaveChangesAsync(cancellationToken);
+
+            await DispatchDomainEvents();
 
             return result;
         }

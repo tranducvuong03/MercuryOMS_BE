@@ -32,49 +32,45 @@ namespace MercuryOMS.Application.Features
         {
             var userId = _currentUser.UserId;
 
-            try
+            if (userId == null)
+                return Result<Guid>.Failure(Message.OrderUserInvalid);
+
+            var variantIds = request.Items
+                .Select(x => x.ProductVariantId)
+                .ToList();
+
+            var variants = await _unitOfWork.GetRepository<ProductVariant>().Query
+                .Where(v => variantIds.Contains(v.Id))
+                .ToDictionaryAsync(v => v.Id, ct);
+
+            if (variants.Count != variantIds.Count)
+                return Result<Guid>.Failure("Biến thể sản phẩm không tồn tại.");
+
+            var order = new Order(userId.Value);
+
+            foreach (var item in request.Items)
             {
-                if (userId == Guid.Empty)
-                    return Result<Guid>.Failure(Message.OrderUserInvalid);
+                var variant = variants[item.ProductVariantId];
 
-                var productIds = request.Items.Select(x => x.ProductId).ToList();
+                var product = await _unitOfWork.GetRepository<Product>().Query
+                    .FirstAsync(p => p.Id == variant.ProductId, ct);
 
-                var products = await _unitOfWork.GetRepository<Product>().Query
-                    .Where(p => productIds.Contains(p.Id))
-                    .ToDictionaryAsync(p => p.Id, ct);
+                if (!product.IsActive)
+                    return Result<Guid>.Failure($"Sản phẩm không hoạt động: {product.Name}");
 
-                if (products.Count != productIds.Count)
-                    return Result<Guid>.Failure(Message.OrderProductNotFound);
+                var price = variant.Price;
 
-                var order = new Order(userId);
-
-                foreach (var item in request.Items)
-                {
-                    var product = products[item.ProductId];
-
-                    if (!product.IsActive)
-                        return Result<Guid>.Failure(
-                            $"{Message.OrderProductInactive}: {product.Name}"
-                        );
-
-                    var price = product.BasePrice;
-
-                    order.AddItem(
-                        item.ProductId,
-                        item.Quantity,
-                        price
-                    );
-                }
-
-                await _unitOfWork.GetRepository<Order>().AddAsync(order, ct);
-                await _unitOfWork.SaveChangesAsync(ct);
-
-                return Result<Guid>.Success(order.Id, Message.OrderCreated);
+                order.AddItem(
+                    variant.Id,
+                    item.Quantity,
+                    price
+                );
             }
-            catch
-            {
-                return Result<Guid>.Failure(Message.OrderCreateFailed);
-            }
+
+            await _unitOfWork.GetRepository<Order>().AddAsync(order, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
+
+            return Result<Guid>.Success(order.Id, Message.OrderCreated);
         }
     }
 }

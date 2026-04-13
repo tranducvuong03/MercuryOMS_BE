@@ -15,6 +15,9 @@
         public const string ProductFilterInvalid = "Filter không hợp lệ.";
         public const string ProductGetFailed = "Có lỗi xảy ra khi lấy danh sách sản phẩm.";
 
+        // Product Variant
+        public const string ProductVariantNotNull = "VariantId không được để trống.";
+
         // Inventory
         public const string InventoryNotFound = "Không tìm thấy tồn kho.";
         public const string InventoryReserved = "Giữ hàng thành công.";

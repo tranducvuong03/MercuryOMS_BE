@@ -23,8 +23,8 @@ namespace MercuryOMS.Application.Features
     {
         public CreateOrderItemRequestValidator()
         {
-            RuleFor(x => x.ProductId)
-                .NotEmpty().WithMessage(Message.CartProductIdRequired);
+            RuleFor(x => x.ProductVariantId)
+                .NotEmpty().WithMessage(Message.ProductVariantNotNull);
 
             RuleFor(x => x.Quantity)
                 .GreaterThan(0).WithMessage(Message.OrderQuantityInvalid);

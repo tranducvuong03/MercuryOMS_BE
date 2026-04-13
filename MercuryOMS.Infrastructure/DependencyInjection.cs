@@ -1,5 +1,6 @@
-﻿using MercuryOMS.Application.UOW;
+﻿using MercuryOMS.Application.IRepository;
 using MercuryOMS.Application.IServices;
+using MercuryOMS.Application.UOW;
 using MercuryOMS.Domain.Commons;
 using MercuryOMS.Infrastructure.Data;
 using MercuryOMS.Infrastructure.Data.Interceptors;
@@ -130,7 +131,7 @@ namespace MercuryOMS.Infrastructure
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
+            services.AddScoped<IInventoryRepository, InventoryRepository>();
 
             return services;
         }

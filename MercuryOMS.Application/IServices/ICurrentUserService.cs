@@ -3,7 +3,7 @@
 /// </summary>
 public interface ICurrentUserService
 {
-    Guid UserId { get; }
+    Guid? UserId { get; }
     string Email { get; }
     string FullName { get; }
 }
