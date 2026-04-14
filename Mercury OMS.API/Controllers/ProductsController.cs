@@ -19,7 +19,6 @@ namespace MercuryOMS.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = Role.Seller)]
         public async Task<IActionResult> Create(CreateProductCommand command)
         {
             var result = await _mediator.Send(command);
@@ -74,6 +73,33 @@ namespace MercuryOMS.API.Controllers
         {
             var result = await _mediator.Send(
                 new GetProducts(request));
+
+            return Ok(result);
+        }
+
+        [HttpGet("{id}/categories")]
+        public async Task<IActionResult> GetCategories(Guid id)
+        {
+            var result = await _mediator.Send(
+                new GetProductCategories(id));
+
+            return Ok(result);
+        }
+
+        [HttpGet("{id}/images")]
+        public async Task<IActionResult> GetImages(Guid id)
+        {
+            var result = await _mediator.Send(
+                new GetProductImages(id));
+
+            return Ok(result);
+        }
+
+        [HttpGet("{id}/variants")]
+        public async Task<IActionResult> GetVariants(Guid id)
+        {
+            var result = await _mediator.Send(
+                new GetProductVariants(id));
 
             return Ok(result);
         }

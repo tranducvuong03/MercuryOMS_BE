@@ -127,6 +127,7 @@ namespace MercuryOMS.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Type = table.Column<string>(type: "text", nullable: false),
+                    Queue = table.Column<string>(type: "text", nullable: false),
                     Payload = table.Column<string>(type: "text", nullable: false),
                     IsProcessed = table.Column<bool>(type: "boolean", nullable: false),
                     OccurredOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -482,7 +483,6 @@ namespace MercuryOMS.Infrastructure.Migrations
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
                     Sku = table.Column<string>(type: "text", nullable: false),
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
-                    Stock = table.Column<int>(type: "integer", nullable: false),
                     Color = table.Column<string>(type: "text", nullable: false),
                     Size = table.Column<string>(type: "text", nullable: true)
                 },

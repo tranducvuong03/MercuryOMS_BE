@@ -242,6 +242,10 @@ namespace MercuryOMS.Infrastructure.Migrations
                     b.Property<DateTime?>("ProcessedOn")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Queue")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text");
@@ -390,9 +394,6 @@ namespace MercuryOMS.Infrastructure.Migrations
                     b.Property<string>("Sku")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Stock")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

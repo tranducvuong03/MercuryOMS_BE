@@ -91,7 +91,13 @@ namespace MercuryOMS.Application.Features
 
             foreach (var v in variants)
             {
-                product.AddVariant(v.Sku, v.Price, v.Color, v.Size);
+                product.AddVariant(
+                    v.Sku,
+                    v.Price,
+                    v.Color,
+                    v.Stock,
+                    v.Size
+                );
             }
         }
 
@@ -99,7 +105,7 @@ namespace MercuryOMS.Application.Features
         {
             var productRepo = _unitOfWork.GetRepository<Product>();
             await productRepo.AddAsync(product, ct);
-            await _unitOfWork.SaveChangesAsync(ct);
+            await _unitOfWork.SaveChangesAsync( ct, true);
         }
     }
 }

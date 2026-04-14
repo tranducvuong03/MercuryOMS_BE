@@ -32,7 +32,6 @@ namespace MercuryOMS.Application.Features
             var inventory = await repo.Query
                 .FirstOrDefaultAsync(x => x.VariantId == request.VariantId, ct);
 
-            // 👉 Auto create nếu chưa có (quan trọng)
             if (inventory == null)
             {
                 inventory = new Inventory(request.VariantId, 0);

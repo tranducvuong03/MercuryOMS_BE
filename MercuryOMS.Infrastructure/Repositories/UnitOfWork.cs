@@ -2,7 +2,6 @@
 using MercuryOMS.Application.UOW;
 using MercuryOMS.Domain.Commons;
 using MercuryOMS.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace MercuryOMS.Infrastructure.Repositories
 {
@@ -32,16 +31,18 @@ namespace MercuryOMS.Infrastructure.Repositories
             return (IGenericRepository<T>)_repositories[type];
         }
 
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default, 
+                                                bool dispatchEvents = true)
         {
             var result = await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await DispatchDomainEvents();
+            if (dispatchEvents)
+                await DispatchDomainEvents(cancellationToken);
 
             return result;
         }
 
-        private async Task DispatchDomainEvents()
+        private async Task DispatchDomainEvents(CancellationToken ct)
         {
             var domainEntities = _dbContext.ChangeTracker
                 .Entries<AggregateRoot>()
@@ -56,7 +57,7 @@ namespace MercuryOMS.Infrastructure.Repositories
 
             foreach (var domainEvent in domainEvents)
             {
-                await _mediator.Publish(domainEvent);
+                await _mediator.Publish(domainEvent, ct);
             }
         }
 

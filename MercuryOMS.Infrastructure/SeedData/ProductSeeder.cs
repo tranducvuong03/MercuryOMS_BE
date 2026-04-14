@@ -35,7 +35,7 @@ namespace MercuryOMS.Infrastructure.SeedData
                 {
                     var sku = $"{v.sku}-{Guid.NewGuid().ToString()[..6]}";
 
-                    product.AddVariant(sku, v.price, v.color, v.size);
+                    product.AddVariant(sku, v.price, v.color, v.stock, v.size);
 
                     var variant = product.Variants.First(x => x.Sku == sku);
 
@@ -46,9 +46,9 @@ namespace MercuryOMS.Infrastructure.SeedData
             }
 
             AddProduct("iPhone 15", 20000000, "Điện thoại cao cấp Apple", "Điện tử",
-    "https://example.com/iphone15.jpg",
-    ("IP15-128", 20000000, "Black", "128GB", 10),
-    ("IP15-256", 23000000, "Silver", "256GB", 5));
+                "https://example.com/iphone15.jpg",
+                ("IP15-128", 20000000, "Black", "128GB", 10),
+                ("IP15-256", 23000000, "Silver", "256GB", 5));
 
             AddProduct("Samsung Galaxy S23", 18000000, "Android flagship", "Điện tử",
                 "https://example.com/s23.jpg",

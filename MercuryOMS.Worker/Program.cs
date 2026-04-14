@@ -12,17 +12,20 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 // Hosted Services
+builder.Services.AddHostedService<InventoryInitConsumer>();
 builder.Services.AddHostedService<PaymentPaidConsumer>();
 builder.Services.AddHostedService<OutboxProcessor>();
 
 // Services
 builder.Services.AddWorker(builder.Configuration);
 
+// DbContext
 builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("MercuryOMSDatabase"));
 });
 
+// MediatR
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);

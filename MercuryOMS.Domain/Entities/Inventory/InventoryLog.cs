@@ -23,7 +23,7 @@ namespace MercuryOMS.Domain.Entities
             int quantity,
             Guid? referenceId = null)
         {
-            if (quantity <= 0)
+            if (quantity < 0)
                 throw new DomainException("Số lượng phải lớn hơn 0.");
 
             Id = Guid.NewGuid();

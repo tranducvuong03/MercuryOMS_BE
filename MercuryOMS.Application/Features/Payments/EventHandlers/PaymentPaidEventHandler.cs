@@ -50,11 +50,12 @@ namespace MercuryOMS.Application.Features
 
             var outbox = new OutboxMessage(
                 type: nameof(PaymentPaidMessage),
+                queue: QueueNames.PaymentPaid,
                 payload: JsonSerializer.Serialize<PaymentPaidMessage>(message)
             );
 
             await _uow.GetRepository<OutboxMessage>().AddAsync(outbox);
-
+            await _uow.SaveChangesAsync(ct);
         }
     }
 }

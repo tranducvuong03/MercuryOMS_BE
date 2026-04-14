@@ -33,7 +33,7 @@ namespace MercuryOMS.Worker.OutboxProcessor
                 {
                     try
                     {
-                        await bus.PublishAsync("payment.paid", msg.Payload);
+                        await bus.PublishAsync(msg.Queue, msg.Payload);
 
                         msg.MarkAsProcessed();
                         msg.ProcessedOn = DateTime.UtcNow;
@@ -43,8 +43,6 @@ namespace MercuryOMS.Worker.OutboxProcessor
                         Console.WriteLine($"Outbox error: {ex.Message}");
                     }
                 }
-
-                await db.SaveChangesAsync(stoppingToken);
 
                 await Task.Delay(1000, stoppingToken);
             }

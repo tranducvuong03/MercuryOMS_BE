@@ -1,4 +1,5 @@
 ﻿using MercuryOMS.Domain.Commons;
+using MercuryOMS.Domain.Events;
 using MercuryOMS.Domain.Exceptions;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -125,7 +126,7 @@ namespace MercuryOMS.Domain.Entities
                 _images.Remove(img);
         }
 
-        public void AddVariant(string sku, decimal price, string color, string? size = null)
+        public void AddVariant(string sku, decimal price, string color, int initialStock, string? size = null)
         {
             if (string.IsNullOrWhiteSpace(sku))
                 throw new DomainException("SKU là bắt buộc.");
@@ -139,7 +140,11 @@ namespace MercuryOMS.Domain.Entities
             if (_variants.Any(x => x.Sku == sku))
                 throw new DomainException("SKU đã tồn tại.");
 
-            _variants.Add(new ProductVariant(Id, sku, price, color, size));
+            var variant = new ProductVariant(Id, sku, price, color, size);
+
+            _variants.Add(variant);
+
+            AddDomainEvent(new VariantCreatedEvent(variant.Id, initialStock));
         }
 
         private ProductVariant GetVariant(Guid variantId)

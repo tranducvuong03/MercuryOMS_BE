@@ -9,9 +9,7 @@
         public decimal BasePrice { get; set; }
         public bool IsActive { get; set; }
 
-        public List<ProductCategoryResponse> Categories { get; set; } = new();
-        public List<ProductImageResponse> Images { get; set; } = new();
-        public List<ProductVariantResponse> Variants { get; set; } = new();
+        public string? ThumbnailUrl { get; set; }
     }
 
     public class ProductCategoryResponse
@@ -21,7 +19,6 @@
 
     public class ProductImageResponse
     {
-        public Guid ProductId { get; set; }
         public string Url { get; set; } = null!;
         public bool IsPrimary { get; set; }
     }

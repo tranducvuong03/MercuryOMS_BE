@@ -96,7 +96,12 @@ namespace MercuryOMS.Application.Features
                     Name = x.Name,
                     Description = x.Description,
                     BasePrice = x.BasePrice,
-                    IsActive = x.IsActive
+                    IsActive = x.IsActive,
+
+                    ThumbnailUrl = x.Images
+                        .Where(i => i.IsPrimary)
+                        .Select(i => i.Url)
+                        .FirstOrDefault()
                 })
                 .ToListAsync(ct);
 

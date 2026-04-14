@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MercuryOMS.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260413073637_db")]
+    [Migration("20260414131008_db")]
     partial class db
     {
         /// <inheritdoc />
@@ -245,6 +245,10 @@ namespace MercuryOMS.Infrastructure.Migrations
                     b.Property<DateTime?>("ProcessedOn")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Queue")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text");
@@ -393,9 +397,6 @@ namespace MercuryOMS.Infrastructure.Migrations
                     b.Property<string>("Sku")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Stock")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

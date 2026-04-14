@@ -44,16 +44,6 @@ namespace MercuryOMS.Infrastructure.Data.Interceptors
 
             foreach (var entry in entries)
             {
-                if (entry.Entity is AuditableEntity entity)
-                {
-                    if (entry.State == EntityState.Added)
-                    {
-                        entity.CreatedAt = DateTime.UtcNow;
-                    }
-
-                    entity.LastModifiedAt = DateTime.UtcNow;
-                }
-
                 if (entry.Entity is IAuditableUser userEntity)
                 {
                     if (entry.State == EntityState.Added)

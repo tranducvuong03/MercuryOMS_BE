@@ -4,6 +4,7 @@
     {
         public Guid Id { get; private set; }
         public string Type { get; private set; } = default!;
+        public string Queue { get; private set; } = default!;
         public string Payload { get; set; } = default!;
         public bool IsProcessed { get; set; }
         public DateTime OccurredOn { get; set; }
@@ -11,10 +12,11 @@
 
         private OutboxMessage() { }
 
-        public OutboxMessage(string type, string payload)
+        public OutboxMessage(string type, string queue, string payload)
         {
             Id = Guid.NewGuid();
             Type = type;
+            Queue = queue;
             Payload = payload;
             IsProcessed = false;
             OccurredOn = DateTime.UtcNow;
