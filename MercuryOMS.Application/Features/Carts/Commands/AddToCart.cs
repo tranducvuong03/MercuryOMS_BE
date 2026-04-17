@@ -34,7 +34,7 @@ namespace MercuryOMS.Application.Features
 
             var cart = await _unitOfWork.GetRepository<Cart>().Query
                 .Include(c => c.Items)
-                .FirstOrDefaultAsync(c => c.UserId == userId.Value, ct);
+                .FirstOrDefaultAsync(c => c.UserId == userId, ct);
 
             if (cart is null)
             {

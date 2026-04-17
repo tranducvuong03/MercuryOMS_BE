@@ -1,5 +1,6 @@
 ﻿using MercuryOMS.Domain.Entities;
 using MercuryOMS.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -212,6 +213,11 @@ namespace MercuryOMS.Infrastructure.Data
                 entity.HasMany(s => s.Products)
                       .WithOne()
                       .HasForeignKey(sp => sp.SellerId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne<ApplicationUser>()
+                      .WithOne()
+                      .HasForeignKey<Seller>(x => x.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
 

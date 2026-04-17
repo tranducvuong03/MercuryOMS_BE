@@ -6,7 +6,7 @@ namespace MercuryOMS.Domain.Entities
     public class Seller : AggregateRoot, IAuditableUser
     {
         private readonly List<SellerProduct> _products = new();
-
+        public string UserId { get; private set; }
         public string Name { get; private set; } = null!;
         public bool IsActive { get; private set; }
 
@@ -19,9 +19,11 @@ namespace MercuryOMS.Domain.Entities
 
         private Seller() { }
 
-        public Seller(string name)
+        public Seller(string userId, string name)
         {
             Id = Guid.NewGuid();
+
+            UserId = userId;
             SetName(name);
 
             IsActive = true;

@@ -39,8 +39,7 @@ namespace MercuryOMS.Infrastructure.Data.Interceptors
                             (e.State == EntityState.Added ||
                              e.State == EntityState.Modified));
 
-            // 👇 FIX: fallback
-            var userId = _currentUser.UserId?.ToString() ?? "system";
+            var userId = _currentUser.UserId.ToString() ?? "system";
 
             foreach (var entry in entries)
             {
