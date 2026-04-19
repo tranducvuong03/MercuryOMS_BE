@@ -1,7 +1,10 @@
+using MercuryOMS.API.Hubs;
 using MercuryOMS.API.Middlewares;
 using MercuryOMS.Application;
+using MercuryOMS.Application.IServices;
 using MercuryOMS.Infrastructure;
 using MercuryOMS.Infrastructure.SeedData;
+using MercuryOMS.Infrastructure.Services;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,6 +59,11 @@ builder.Services.AddCors(options =>
     });
 });
 
+// SignalR
+builder.Services.AddSignalR();
+builder.Services.AddScoped<INotificationHub, NotificationHubService>();
+builder.Services.AddScoped<INotificationRealtimeService, NotificationRealtimeService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -73,5 +81,7 @@ app.UseAuthorization();
 app.UseCors("AllowAll");
 app.UseMiddleware<RequestTimeMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
+
+app.MapHub<NotificationHub>("/hubs/notification");
 app.MapControllers();
 app.Run();

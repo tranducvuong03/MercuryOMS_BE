@@ -1,4 +1,5 @@
 ﻿using MercuryOMS.Domain.Entities;
+using MercuryOMS.Domain.Entities.Notification;
 using MercuryOMS.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -28,6 +29,7 @@ namespace MercuryOMS.Infrastructure.Data
         public DbSet<Shipment> Shipments => Set<Shipment>();
         public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
         public DbSet<TicketMessage> TicketMessages => Set<TicketMessage>();
+        public DbSet<Notification> Notifications => Set<Notification>();
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
