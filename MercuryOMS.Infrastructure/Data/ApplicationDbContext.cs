@@ -1,7 +1,6 @@
 ﻿using MercuryOMS.Domain.Entities;
 using MercuryOMS.Domain.Entities.Notification;
 using MercuryOMS.Infrastructure.Identity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,6 +29,8 @@ namespace MercuryOMS.Infrastructure.Data
         public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
         public DbSet<TicketMessage> TicketMessages => Set<TicketMessage>();
         public DbSet<Notification> Notifications => Set<Notification>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+        public DbSet<Review> Reviews => Set<Review>();
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -48,6 +49,9 @@ namespace MercuryOMS.Infrastructure.Data
             ConfigureSeller(builder);
             ConfigureShipment(builder);
             ConfigureSupportTicket(builder);
+            ConfigureRefreshToken(builder);
+            ConfigureNotification(builder);
+            ConfigureAddress(builder);
         }
 
         private static void ConfigureCart(ModelBuilder builder)
@@ -57,23 +61,17 @@ namespace MercuryOMS.Infrastructure.Data
                 entity.HasKey(c => c.Id);
 
                 entity.Property(c => c.UserId).IsRequired();
-
-                entity.HasMany(c => c.Items)
-                      .WithOne()
-                      .HasForeignKey(ci => ci.Id) 
-                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.Entity<CartItem>(entity =>
             {
                 entity.HasKey(ci => ci.Id);
 
-                entity.Property(ci => ci.Id).IsRequired();
-                entity.Property(ci => ci.ProductId).IsRequired();
-                entity.Property(ci => ci.Quantity).IsRequired();
+                entity.Property(ci => ci.CartId).IsRequired();
 
-                entity.HasIndex(ci => ci.Id);
-                entity.HasIndex(ci => ci.ProductId);
+                entity.Property(ci => ci.ProductId).IsRequired();
+                entity.Property(ci => ci.VariantId).IsRequired();
+                entity.Property(ci => ci.Quantity).IsRequired();
             });
         }
 
@@ -83,8 +81,18 @@ namespace MercuryOMS.Infrastructure.Data
             {
                 entity.HasKey(p => p.Id);
 
-                entity.Property(p => p.Name).IsRequired();
-                entity.Property(p => p.BasePrice).IsRequired();
+                entity.Property(p => p.Name)
+                      .IsRequired()
+                      .HasMaxLength(200);
+
+                entity.Property(p => p.Description)
+                      .HasMaxLength(2000);
+
+                entity.Property(p => p.IsActive)
+                      .IsRequired();
+
+                entity.Property(p => p.Brand)
+                      .HasMaxLength(100);
 
                 entity.HasMany(p => p.Images)
                       .WithOne()
@@ -94,6 +102,11 @@ namespace MercuryOMS.Infrastructure.Data
                 entity.HasMany(p => p.Variants)
                       .WithOne()
                       .HasForeignKey(pv => pv.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(p => p.Categories)
+                      .WithOne()
+                      .HasForeignKey(pc => pc.ProductId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -154,6 +167,8 @@ namespace MercuryOMS.Infrastructure.Data
                       .WithOne()
                       .HasForeignKey(oi => oi.OrderId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.OwnsOne(o => o.ShippingAddress);
             });
 
             builder.Entity<OrderItem>(entity =>
@@ -260,6 +275,8 @@ namespace MercuryOMS.Infrastructure.Data
                       .WithOne()
                       .HasForeignKey<Shipment>(s => s.OrderId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.OwnsOne(s => s.ShippingAddress);
             });
         }
 
@@ -313,6 +330,93 @@ namespace MercuryOMS.Infrastructure.Data
                       .IsRequired();
 
                 entity.HasIndex(m => m.TicketId);
+            });
+        }
+
+        private static void ConfigureNotification(ModelBuilder builder)
+        {
+            builder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(n => n.Id);
+                entity.Property(n => n.UserId).IsRequired();
+                entity.Property(n => n.Message).IsRequired();
+                entity.Property(n => n.IsRead).IsRequired();
+                entity.HasIndex(n => n.UserId);
+            });
+        }
+
+        private static void ConfigureRefreshToken(ModelBuilder builder)
+        {
+            builder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(x => x.Token);
+
+                entity.Property(x => x.Token)
+                      .IsRequired();
+
+                entity.Property(x => x.UserId)
+                      .IsRequired();
+
+                entity.Property(x => x.ExpiryDate)
+                      .IsRequired();
+
+                entity.Property(x => x.IsRevoked)
+                      .IsRequired();
+
+                entity.HasIndex(x => x.UserId);
+            });
+        }
+
+        private static void ConfigureAddress(ModelBuilder builder)
+        {
+            builder.Entity<UserAddress>(b =>
+            {
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.UserId).IsRequired();
+
+                b.Property(x => x.Label)
+                    .HasMaxLength(100)
+                    .IsRequired();
+
+                b.Property(x => x.IsDefault).IsRequired();
+
+                b.HasIndex(x => new { x.UserId, x.IsDefault });
+
+                b.OwnsOne(x => x.Address, a =>
+                {
+                    a.Property(p => p.ReceiverName)
+                        .HasColumnName("ReceiverName")
+                        .HasMaxLength(150)
+                        .IsRequired();
+
+                    a.Property(p => p.Phone)
+                        .HasColumnName("Phone")
+                        .HasMaxLength(20)
+                        .IsRequired();
+
+                    a.Property(p => p.Street)
+                        .HasColumnName("Street")
+                        .HasMaxLength(255)
+                        .IsRequired();
+
+                    a.Property(p => p.District)
+                        .HasColumnName("District")
+                        .HasMaxLength(150)
+                        .IsRequired();
+
+                    a.Property(p => p.City)
+                        .HasColumnName("City")
+                        .HasMaxLength(150)
+                        .IsRequired();
+
+                    a.Property(p => p.Province)
+                        .HasColumnName("Province")
+                        .HasMaxLength(150)
+                        .IsRequired();
+
+                    a.WithOwner();
+                });
             });
         }
     }

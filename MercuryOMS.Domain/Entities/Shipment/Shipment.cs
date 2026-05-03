@@ -1,6 +1,8 @@
 ﻿using MercuryOMS.Domain.Commons;
 using MercuryOMS.Domain.Enums;
 using MercuryOMS.Domain.Exceptions;
+using MercuryOMS.Domain.ValueObjects;
+using System.Net;
 
 namespace MercuryOMS.Domain.Entities
 {
@@ -10,11 +12,9 @@ namespace MercuryOMS.Domain.Entities
 
         public ShipmentStatus Status { get; private set; }
 
-        public string ReceiverName { get; private set; } = null!;
-        public string Phone { get; private set; } = null!;
-        public string Address { get; private set; } = null!;
+        public Address ShippingAddress { get; private set; } = null!;
 
-        public string? Carrier { get; private set; }          // GHN, GHTK, VNPost...
+        public string? Carrier { get; private set; }      // GHN, GHTK...
         public string? TrackingCode { get; private set; }
 
         public DateTime CreatedAt { get; private set; }
@@ -23,18 +23,14 @@ namespace MercuryOMS.Domain.Entities
 
         private Shipment() { }
 
-        public Shipment(
-            Guid orderId,
-            string receiverName,
-            string phone,
-            string address)
+        public Shipment(Guid orderId, Address address)
         {
+            if (orderId == Guid.Empty)
+                throw new DomainException("OrderId không hợp lệ.");
+
             Id = Guid.NewGuid();
             OrderId = orderId;
-
-            ReceiverName = receiverName;
-            Phone = phone;
-            Address = address;
+            ShippingAddress = address;
 
             Status = ShipmentStatus.Pending;
             CreatedAt = DateTime.UtcNow;
@@ -43,17 +39,24 @@ namespace MercuryOMS.Domain.Entities
         public void AssignCarrier(string carrier, string trackingCode)
         {
             if (Status != ShipmentStatus.Pending && Status != ShipmentStatus.Ready)
-                throw new DomainException("Không thể gán đơn vị vận chuyển cho trạng thái hiện tại.");
+                throw new DomainException("Không thể gán đơn vị vận chuyển.");
+
+            if (string.IsNullOrWhiteSpace(carrier))
+                throw new DomainException("Carrier không hợp lệ.");
+
+            if (string.IsNullOrWhiteSpace(trackingCode))
+                throw new DomainException("Tracking code không hợp lệ.");
 
             Carrier = carrier;
             TrackingCode = trackingCode;
+
             Status = ShipmentStatus.Ready;
         }
 
         public void MarkShipping()
         {
             if (Status != ShipmentStatus.Ready)
-                throw new DomainException("Đơn hàng chưa sẵn sàng để giao.");
+                throw new DomainException("Chưa sẵn sàng giao.");
 
             Status = ShipmentStatus.Shipping;
             ShippedAt = DateTime.UtcNow;
@@ -62,7 +65,7 @@ namespace MercuryOMS.Domain.Entities
         public void MarkDelivered()
         {
             if (Status != ShipmentStatus.Shipping)
-                throw new DomainException("Đơn hàng chưa ở trạng thái đang giao.");
+                throw new DomainException("Chưa ở trạng thái giao.");
 
             Status = ShipmentStatus.Delivered;
             DeliveredAt = DateTime.UtcNow;
@@ -71,7 +74,7 @@ namespace MercuryOMS.Domain.Entities
         public void MarkFailed()
         {
             if (Status != ShipmentStatus.Shipping)
-                throw new DomainException("Đơn hàng chưa ở trạng thái đang giao.");
+                throw new DomainException("Chưa ở trạng thái giao.");
 
             Status = ShipmentStatus.Failed;
         }
@@ -79,7 +82,7 @@ namespace MercuryOMS.Domain.Entities
         public void Cancel()
         {
             if (Status == ShipmentStatus.Delivered)
-                throw new DomainException("Đơn hàng đã giao không thể hủy.");
+                throw new DomainException("Đã giao không thể hủy.");
 
             Status = ShipmentStatus.Cancelled;
         }

@@ -1,13 +1,15 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using MercuryOMS.Application.Commons;
 using MercuryOMS.Application.UOW;
 using MercuryOMS.Domain.Constants;
-using Microsoft.EntityFrameworkCore;
+using MercuryOMS.Domain.Entities;
 
 namespace MercuryOMS.Application.Features
 {
     public record RemoveFromCartCommand(
-        Guid ProductId
+        Guid ProductId,
+        Guid VariantId
     ) : IRequest<Result>;
 
     public class RemoveFromCartHandler : IRequestHandler<RemoveFromCartCommand, Result>
@@ -27,6 +29,9 @@ namespace MercuryOMS.Application.Features
         {
             var userId = _currentUser.UserId;
 
+            if (userId == null)
+                throw new UnauthorizedAccessException("Người dùng chưa đăng nhập.");
+
             var cart = await _unitOfWork.GetRepository<Cart>().Query
                 .Include(c => c.Items)
                 .FirstOrDefaultAsync(c => c.UserId == userId, ct);
@@ -36,9 +41,9 @@ namespace MercuryOMS.Application.Features
 
             try
             {
-                cart.RemoveItem(request.ProductId);
+                cart.RemoveItem(request.ProductId, request.VariantId);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return Result.Failure(ex.Message);
             }

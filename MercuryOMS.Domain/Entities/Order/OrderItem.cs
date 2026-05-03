@@ -6,6 +6,7 @@ namespace MercuryOMS.Domain.Entities
     public class OrderItem : BaseEntity
     {
         public Guid OrderId { get; private set; }
+        public Guid ProductId { get; private set; }
         public Guid ProductVariantId { get; private set; }
 
         public int Quantity { get; private set; }
@@ -13,10 +14,13 @@ namespace MercuryOMS.Domain.Entities
 
         public decimal Total => Quantity * UnitPrice;
 
+        public bool IsReviewed { get; private set; }
+
         private OrderItem() { }
 
         internal OrderItem(
             Guid orderId,
+            Guid productId,
             Guid productVariantId,
             int quantity,
             decimal unitPrice)
@@ -29,9 +33,12 @@ namespace MercuryOMS.Domain.Entities
 
             Id = Guid.NewGuid();
             OrderId = orderId;
+            ProductId = productId;
             ProductVariantId = productVariantId;
             Quantity = quantity;
             UnitPrice = unitPrice;
+
+            IsReviewed = false;
         }
 
         internal void IncreaseQuantity(int quantity)
@@ -40,6 +47,14 @@ namespace MercuryOMS.Domain.Entities
                 throw new DomainException("Số lượng phải lớn hơn 0.");
 
             Quantity += quantity;
+        }
+
+        public void MarkAsReviewed()
+        {
+            if (IsReviewed)
+                throw new DomainException("Sản phẩm này đã được đánh giá rồi.");
+
+            IsReviewed = true;
         }
     }
 }

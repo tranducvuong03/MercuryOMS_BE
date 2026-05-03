@@ -32,16 +32,19 @@ namespace MercuryOMS.Application.Features
             CancellationToken ct)
         {
             var strategy = _factory.Get(request.Method.ToString());
+
             var payment = await strategy.CreatePaymentAsync(
                 request.OrderId,
                 request.Amount,
                 ct
             );
-            payment.MarkPaid();
+
             await _unitOfWork.GetRepository<Payment>()
                 .AddAsync(payment, ct);
+
             await _unitOfWork.SaveChangesAsync(ct);
-            return Result<Guid>.Success(payment.Id, "Tạo payment thành công");
+
+            return Result<Guid>.Success(payment.Id, "Tạo thanh toán thành công");
         }
     }
 }

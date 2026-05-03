@@ -19,6 +19,12 @@
                    $"{minPrice ?? 0}:{maxPrice ?? 0}";
         }
 
+        // detail
+        public static string ProductDetail(Guid productId)
+        {
+            return $"product:detail:{productId}";
+        }
+
         // User / Auth
         public const string UserById = "user:{0}";
         public const string RevokedJwt = "revoked_jwt:{0}";

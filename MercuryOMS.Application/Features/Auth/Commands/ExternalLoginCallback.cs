@@ -4,10 +4,11 @@ using MercuryOMS.Application.IServices;
 
 namespace MercuryOMS.Application.Features
 {
-    public record ExternalLoginCallbackCommand() : IRequest<Result<string>>;
+    public record ExternalLoginCallbackCommand()
+        : IRequest<Result<(string accessToken, string refreshToken)>>;
 
     public class ExternalLoginCallbackHandler
-    : IRequestHandler<ExternalLoginCallbackCommand, Result<string>>
+        : IRequestHandler<ExternalLoginCallbackCommand, Result<(string accessToken, string refreshToken)>>
     {
         private readonly IAuthService _authService;
 
@@ -16,11 +17,11 @@ namespace MercuryOMS.Application.Features
             _authService = authService;
         }
 
-        public async Task<Result<string>> Handle(
+        public async Task<Result<(string accessToken, string refreshToken)>> Handle(
             ExternalLoginCallbackCommand request,
             CancellationToken ct)
         {
-            return await _authService.ExternalLoginCallbackAsync();
+            return await _authService.ExternalLoginCallbackAsync(ct);
         }
     }
 }

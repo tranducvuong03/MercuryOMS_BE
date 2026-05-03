@@ -17,7 +17,7 @@ namespace MercuryOMS.API.Controllers
 
         [HttpPost]
         public async Task<IActionResult> CreateOrder(
-            [FromBody] CreateOrderCommand command,
+            [FromBody] CreateOrderFromCartCommand command,
             CancellationToken ct)
         {
             var result = await _mediator.Send(command, ct);

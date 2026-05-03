@@ -11,7 +11,8 @@ namespace MercuryOMS.Infrastructure.SeedData
             if (await context.Products.AnyAsync())
                 return;
 
-            var categories = await context.Categories.ToDictionaryAsync(c => c.Name, c => c.Id);
+            var categories = await context.Categories
+                .ToDictionaryAsync(c => c.Name, c => c.Id);
 
             Guid GetCategory(string name) => categories[name];
 
@@ -19,13 +20,12 @@ namespace MercuryOMS.Infrastructure.SeedData
 
             void AddProduct(
                 string name,
-                decimal price,
                 string description,
                 string categoryName,
                 string imageUrl,
-                params (string sku, decimal price, string color, string? size, int stock)[] variants)                           
+                params (string sku, decimal originalPrice, decimal? discountPrice, string color, string? size, int stock)[] variants)
             {
-                var product = new Product(name, price);
+                var product = new Product(name);
 
                 product.SetDescription(description);
                 product.AddCategory(GetCategory(categoryName));
@@ -35,7 +35,15 @@ namespace MercuryOMS.Infrastructure.SeedData
                 {
                     var sku = $"{v.sku}-{Guid.NewGuid().ToString()[..6]}";
 
-                    product.AddVariant(sku, v.price, v.color, v.stock, v.size);
+                    product.AddVariant(
+                        sku,
+                        v.originalPrice,
+                        v.discountPrice,
+                        v.color,
+                        v.stock,
+                        null,
+                        v.size
+                    );
 
                     var variant = product.Variants.First(x => x.Sku == sku);
 
@@ -45,91 +53,171 @@ namespace MercuryOMS.Infrastructure.SeedData
                 products.Add(product);
             }
 
-            AddProduct("iPhone 15", 20000000, "Điện thoại cao cấp Apple", "Điện tử",
-                "https://example.com/iphone15.jpg",
-                ("IP15-128", 20000000, "Black", "128GB", 10),
-                ("IP15-256", 23000000, "Silver", "256GB", 5));
+            AddProduct(
+                "iPhone 15",
+                "Điện thoại cao cấp Apple",
+                "Điện tử",
+                "https://picsum.photos/seed/p1/600/600",
+                ("IP15-128", 20000000, 19500000, "Black", "128GB", 10),
+                ("IP15-256", 23000000, null, "Silver", "256GB", 5)
+            );
 
-            AddProduct("Samsung Galaxy S23", 18000000, "Android flagship", "Điện tử",
-                "https://example.com/s23.jpg",
-                ("S23-128", 18000000, "Black", "128GB", 10),
-                ("S23-256", 21000000, "Green", "256GB", 5));
+            AddProduct(
+                "Samsung Galaxy S23",
+                "Android flagship",
+                "Điện tử",
+                "https://picsum.photos/seed/p2/600/600",
+                ("S23-128", 18000000, 17500000, "Black", "128GB", 10),
+                ("S23-256", 21000000, null, "Green", "256GB", 5)
+            );
 
-            AddProduct("MacBook Air M2", 28000000, "Laptop mỏng nhẹ", "Điện tử",
-                "https://example.com/macbook.jpg",
-                ("MBA-8", 28000000, "Gray", "8GB", 8),
-                ("MBA-16", 32000000, "Gray", "16GB", 3));
+            AddProduct(
+                "MacBook Air M2",
+                "Laptop mỏng nhẹ",
+                "Điện tử",
+                "https://picsum.photos/seed/p3/600/600",
+                ("MBA-8", 28000000, 27000000, "Gray", "8GB", 8),
+                ("MBA-16", 32000000, null, "Gray", "16GB", 3)
+            );
 
-            AddProduct("Dell XPS 13", 30000000, "Laptop cao cấp", "Điện tử",
-                "https://example.com/xps13.jpg",
-                ("XPS-8", 30000000, "Silver", "8GB", 6),
-                ("XPS-16", 34000000, "Silver", "16GB", 4));
+            AddProduct(
+                "Dell XPS 13",
+                "Laptop cao cấp",
+                "Điện tử",
+                "https://picsum.photos/seed/p4/600/600",
+                ("XPS-8", 30000000, 29000000, "Silver", "8GB", 6),
+                ("XPS-16", 34000000, null, "Silver", "16GB", 4)
+            );
 
-            AddProduct("AirPods Pro", 6000000, "Tai nghe chống ồn", "Điện tử",
-                "https://example.com/airpods.jpg",
-                ("APP", 6000000, "White", null, 20));
+            AddProduct(
+                "AirPods Pro",
+                "Tai nghe chống ồn",
+                "Điện tử",
+                "https://picsum.photos/seed/p5/600/600",
+                ("APP", 6000000, 5500000, "White", null, 20)
+            );
 
-            AddProduct("Logitech MX Master 3", 2500000, "Chuột cao cấp", "Điện tử",
-                "https://example.com/mouse.jpg",
-                ("MXM3", 2500000, "Black", null, 15));
+            AddProduct(
+                "Logitech MX Master 3",
+                "Chuột cao cấp",
+                "Điện tử",
+                "https://picsum.photos/seed/p6/600/600",
+                ("MXM3", 2500000, 2300000, "Black", null, 15)
+            );
 
-            AddProduct("Keychron K6", 2200000, "Bàn phím cơ", "Điện tử",
-                "https://example.com/keychron.jpg",
-                ("K6", 2200000, "Black", null, 10));
+            AddProduct(
+                "Keychron K6",
+                "Bàn phím cơ",
+                "Điện tử",
+                "https://picsum.photos/seed/p7/600/600",
+                ("K6", 2200000, null, "Black", null, 10)
+            );
 
-            AddProduct("LG 27 inch", 5000000, "Màn hình IPS", "Điện tử",
-                "https://example.com/lg.jpg",
-                ("LG27", 5000000, "Black", "27inch", 7));
+            AddProduct(
+                "LG 27 inch",
+                "Màn hình IPS",
+                "Điện tử",
+                "https://picsum.photos/seed/p8/600/600",
+                ("LG27", 5000000, 4800000, "Black", "27inch", 7)
+            );
 
-            AddProduct("SSD Samsung 1TB", 2000000, "Ổ cứng SSD", "Điện tử",
-                "https://example.com/ssd.jpg",
-                ("SSD1TB", 2000000, "Black", "1TB", 25));
+            AddProduct(
+                "SSD Samsung 1TB",
+                "Ổ cứng SSD",
+                "Điện tử",
+                "https://picsum.photos/seed/p9/600/600",
+                ("SSD1TB", 2000000, null, "Black", "1TB", 25)
+            );
 
-            AddProduct("JBL Flip 6", 3000000, "Loa bluetooth", "Điện tử",
-                "https://example.com/jbl.jpg",
-                ("JBL6", 3000000, "Blue", null, 12));
+            AddProduct(
+                "JBL Flip 6",
+                "Loa bluetooth",
+                "Điện tử",
+                "https://picsum.photos/seed/p10/600/600",
+                ("JBL6", 3000000, 2700000, "Blue", null, 12)
+            );
 
-            AddProduct("Áo thun basic", 150000, "Cotton 100%", "Thời trang",
-                "https://example.com/tshirt.jpg",
-                ("TS-BLACK-M", 150000, "Black", "M", 50),
-                ("TS-WHITE-L", 150000, "White", "L", 40));
+            AddProduct(
+                "Áo thun basic",
+                "Cotton 100%",
+                "Thời trang",
+                "https://picsum.photos/seed/p11/600/600",
+                ("TS-BLACK-M", 150000, 120000, "Black", "M", 50),
+                ("TS-WHITE-L", 150000, null, "White", "L", 40)
+            );
 
-            AddProduct("Quần jeans", 400000, "Slim fit", "Thời trang",
-                "https://example.com/jeans.jpg",
-                ("JEANS-32", 400000, "Blue", "32", 30));
+            AddProduct(
+                "Quần jeans",
+                "Slim fit",
+                "Thời trang",
+                "https://picsum.photos/seed/p12/600/600",
+                ("JEANS-32", 400000, 350000, "Blue", "32", 30)
+            );
 
-            AddProduct("Áo hoodie", 350000, "Áo nỉ", "Thời trang",
-                "https://example.com/hoodie.jpg",
-                ("HOODIE-M", 350000, "Black", "M", 20));
+            AddProduct(
+                "Áo hoodie",
+                "Áo nỉ",
+                "Thời trang",
+                "https://picsum.photos/seed/p13/600/600",
+                ("HOODIE-M", 350000, null, "Black", "M", 20)
+            );
 
-            AddProduct("Giày sneaker", 900000, "Giày thể thao", "Thời trang",
-                "https://example.com/sneaker.jpg",
-                ("SNK-42", 900000, "White", "42", 15),
-                ("SNK-43", 900000, "Black", "43", 15));
+            AddProduct(
+                "Giày sneaker",
+                "Giày thể thao",
+                "Thời trang",
+                "https://picsum.photos/seed/p14/600/600",
+                ("SNK-42", 900000, 850000, "White", "42", 15),
+                ("SNK-43", 900000, null, "Black", "43", 15)
+            );
 
-            AddProduct("Áo sơ mi", 250000, "Công sở", "Thời trang",
-                "https://example.com/shirt.jpg",
-                ("SHIRT-M", 250000, "White", "M", 35));
+            AddProduct(
+                "Áo sơ mi",
+                "Công sở",
+                "Thời trang",
+                "https://picsum.photos/seed/p15/600/600",
+                ("SHIRT-M", 250000, 220000, "White", "M", 35)
+            );
 
-            AddProduct("Váy nữ", 500000, "Thời trang nữ", "Thời trang",
-                "https://example.com/dress.jpg",
-                ("DRESS-S", 500000, "Red", "S", 18));
+            AddProduct(
+                "Váy nữ",
+                "Thời trang nữ",
+                "Thời trang",
+                "https://picsum.photos/seed/p16/600/600",
+                ("DRESS-S", 500000, 450000, "Red", "S", 18)
+            );
 
-            AddProduct("Áo khoác denim", 600000, "Jean jacket", "Thời trang",
-                "https://example.com/denim.jpg",
-                ("DENIM-M", 600000, "Blue", "M", 12));
+            AddProduct(
+                "Áo khoác denim",
+                "Jean jacket",
+                "Thời trang",
+                "https://picsum.photos/seed/p17/600/600",
+                ("DENIM-M", 600000, null, "Blue", "M", 12)
+            );
 
-            AddProduct("Balo", 300000, "Tiện dụng", "Thời trang",
-                "https://example.com/backpack.jpg",
-                ("BALO", 300000, "Black", null, 25));
+            AddProduct(
+                "Balo",
+                "Tiện dụng",
+                "Thời trang",
+                "https://picsum.photos/seed/p18/600/600",
+                ("BALO", 300000, 250000, "Black", null, 25)
+            );
 
-            AddProduct("Nón lưỡi trai", 120000, "Casual", "Thời trang",
-                "https://example.com/cap.jpg",
-                ("CAP", 120000, "Black", null, 40));
+            AddProduct(
+                "Nón lưỡi trai",
+                "Casual",
+                "Thời trang",
+                "https://picsum.photos/seed/p19/600/600",
+                ("CAP", 120000, null, "Black", null, 40)
+            );
 
-            AddProduct("Thắt lưng da", 200000, "Da thật", "Thời trang",
-                "https://example.com/belt.jpg",
-                ("BELT", 200000, "Brown", null,  22));
+            AddProduct(
+                "Thắt lưng da",
+                "Da thật",
+                "Thời trang",
+                "https://picsum.photos/seed/p20/600/600",
+                ("BELT", 200000, 180000, "Brown", null, 22)
+            );
 
             await context.Products.AddRangeAsync(products);
             await context.SaveChangesAsync();

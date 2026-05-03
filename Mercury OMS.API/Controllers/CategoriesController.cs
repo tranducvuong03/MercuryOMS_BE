@@ -1,13 +1,11 @@
 ﻿using MediatR;
 using MercuryOMS.Application.Features;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MercuryOMS.API.Controllers
 {
     [Route("api/categories")]
     [ApiController]
-    [Authorize]
     public class CategoriesController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -23,10 +23,7 @@ namespace MercuryOMS.Worker.PaymentConsumer
             if (order == null)
                 throw new Exception($"Không tìm thấy đơn hàng: {message.OrderId}");
 
-            if (order.Status == OrderStatus.Paid)
-                return;
-
-            order.MarkAsPaid();
+            order.MarkAsCompleted();
 
             await _uow.SaveChangesAsync();
         }

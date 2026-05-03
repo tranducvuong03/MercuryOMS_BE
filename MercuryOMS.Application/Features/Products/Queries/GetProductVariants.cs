@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using MercuryOMS.Application.Commons;
-using MercuryOMS.Application.Models;
+using MercuryOMS.Application.Models.Responses;
 using MercuryOMS.Application.UOW;
 using MercuryOMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -36,8 +36,16 @@ namespace MercuryOMS.Application.Features
                 {
                     Id = v.Id,
                     Sku = v.Sku,
-                    Price = v.Price,
-                    Stock = i != null ? i.Available : 0
+
+                    OriginalPrice = v.OriginalPrice,
+                    DiscountPrice = v.DiscountPrice,
+
+                    Color = v.Color,
+                    Size = v.Size,
+
+                    Stock = i != null ? i.Available : 0,
+
+                    ImageUrl = v.ImageUrl
                 }
             ).ToListAsync(ct);
 

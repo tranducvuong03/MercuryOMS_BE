@@ -5,18 +5,21 @@ namespace MercuryOMS.Domain.Entities
 {
     public class CartItem : BaseEntity
     {
+        public Guid CartId { get; private set; } 
         public Guid ProductId { get; private set; }
+        public Guid VariantId { get; private set; }
         public int Quantity { get; private set; }
 
         private CartItem() { }
 
-        internal CartItem(Guid productId, int quantity)
+        internal CartItem(Guid cartId, Guid productId, Guid variantId, int quantity)
         {
             if (quantity <= 0)
                 throw new DomainException("Số lượng phải lớn hơn 0.");
 
-            Id = Guid.NewGuid();
+            CartId = cartId;
             ProductId = productId;
+            VariantId = variantId;
             Quantity = quantity;
         }
 

@@ -11,11 +11,13 @@ namespace MercuryOMS.Application.Features
                 .NotEmpty()
                 .WithMessage(Message.CartProductIdRequired);
 
-            RuleFor(x => x.Quantity)
-                .GreaterThan(0)
-                .WithMessage(Message.CartQuantityGreaterThanZero);
+            RuleFor(x => x.VariantId)
+                .NotEmpty()
+                .WithMessage("VariantId là bắt buộc");
 
             RuleFor(x => x.Quantity)
+                .GreaterThan(0)
+                .WithMessage(Message.CartQuantityGreaterThanZero)
                 .LessThanOrEqualTo(100)
                 .WithMessage(Message.CartQuantityMaxExceeded);
         }

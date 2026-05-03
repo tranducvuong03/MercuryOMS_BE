@@ -48,7 +48,7 @@ namespace MercuryOMS.Infrastructure.Services
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(
-                    int.Parse(_configuration["Jwt:ExpireMinutes"]!)),
+                    int.Parse(_configuration["Jwt:AccessTokenMinutes"]!)),
                 signingCredentials: creds
             );
 

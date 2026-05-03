@@ -16,13 +16,14 @@ namespace MercuryOMS.Infrastructure.Repositories
             _dbSet = _db.Set<T>();
         }
 
-        public IQueryable<T> Query => _db.Set<T>().AsQueryable();
+        public IQueryable<T> Query => _dbSet;
+        public IQueryable<T> QueryNoTracking => _dbSet.AsNoTracking();
 
-        public async Task<T?> GetByIdAsync(
-            Guid id,
-            CancellationToken cancellationToken = default)
+        public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _db.Set<T>().FindAsync(new object[] { id }, cancellationToken);
+            return await _dbSet
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id, cancellationToken);
         }
 
         public async Task<IQueryable<T>> GetByFiltersAsync(IEnumerable<Expression<Func<T, bool>>> filters)

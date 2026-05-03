@@ -100,6 +100,14 @@ namespace MercuryOMS.Infrastructure
                     options.AppId = configuration["Auth:Facebook:AppId"];
                     options.AppSecret = configuration["Auth:Facebook:AppSecret"];
                     options.Scope.Add("email");
+
+                    string _frontendUrl = configuration["App:FrontendUrl"]!;
+                    options.Events.OnRemoteFailure = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.Redirect($"{_frontendUrl}/login?error=facebook_cancel");
+                        return Task.CompletedTask;
+                    };
                 });
             return services;
         }

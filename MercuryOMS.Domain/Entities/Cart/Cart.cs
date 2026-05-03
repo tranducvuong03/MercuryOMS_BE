@@ -1,13 +1,12 @@
 ﻿using MercuryOMS.Domain.Commons;
 using MercuryOMS.Domain.Entities;
-using MercuryOMS.Domain.Exceptions; // thêm namespace này
+using MercuryOMS.Domain.Exceptions;
 
 public class Cart : AggregateRoot, IAuditableUser
 {
-    private readonly List<CartItem> _items = new();
+    public ICollection<CartItem> Items { get; private set; } = new List<CartItem>();
 
     public Guid UserId { get; private set; }
-    public IReadOnlyCollection<CartItem> Items => _items.AsReadOnly();
 
     public DateTime? CreatedAt { get; set; }
     public DateTime? LastModifiedAt { get; set; }
@@ -22,46 +21,38 @@ public class Cart : AggregateRoot, IAuditableUser
         UserId = userId;
     }
 
-    public void AddItem(Guid productId, int quantity)
+    public void AddItem(Guid productId, Guid variantId, int quantity)
     {
         if (quantity <= 0)
             throw new DomainException("Số lượng phải lớn hơn 0.");
 
-        var item = _items.FirstOrDefault(i => i.ProductId == productId);
+        var item = Items.FirstOrDefault(i =>
+            i.ProductId == productId &&
+            i.VariantId == variantId);
 
-        if (item == null)
-            _items.Add(new CartItem(productId, quantity));
-        else
+        if (item != null)
+        {
             item.Increase(quantity);
+            return;
+        }
+
+        Items.Add(new CartItem(this.Id, productId, variantId, quantity));
     }
 
-    public void UpdateQuantity(Guid productId, int quantity)
+    public void RemoveItem(Guid productId, Guid variantId)
     {
-        if (quantity <= 0)
-            throw new DomainException("Số lượng phải lớn hơn 0.");
-
-        var item = GetItem(productId);
-        item.SetQuantity(quantity);
-    }
-
-    public void RemoveItem(Guid productId)
-    {
-        var item = GetItem(productId);
-        _items.Remove(item);
-    }
-
-    public void Clear()
-    {
-        _items.Clear();
-    }
-
-    private CartItem GetItem(Guid productId)
-    {
-        var item = _items.FirstOrDefault(i => i.ProductId == productId);
+        var item = Items.FirstOrDefault(i =>
+            i.ProductId == productId &&
+            i.VariantId == variantId);
 
         if (item == null)
             throw new DomainException("Không tìm thấy sản phẩm trong giỏ.");
 
-        return item;
+        Items.Remove(item);
+    }
+
+    public void Clear()
+    {
+        Items.Clear();
     }
 }

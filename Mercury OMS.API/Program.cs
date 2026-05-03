@@ -51,11 +51,12 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    options.AddPolicy("AllowFE", policy =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        policy.WithOrigins("http://localhost:5173")
+              .AllowCredentials()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
@@ -76,9 +77,9 @@ if (app.Environment.IsDevelopment())
 await app.SeedDataAsync();
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFE");
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors("AllowAll");
 app.UseMiddleware<RequestTimeMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 

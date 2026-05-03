@@ -10,14 +10,14 @@ namespace MercuryOMS.Application.Features
 {
     public record CreateProductCommand(
         string Name,
-        decimal BasePrice,
         string? Description,
         List<Guid>? CategoryIds,
         List<string>? ImageUrls,
         List<CreateVariantRequest>? Variants
     ) : IRequest<Result<Guid>>;
 
-    public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, Result<Guid>>
+    public class CreateProductCommandHandler
+        : IRequestHandler<CreateProductCommand, Result<Guid>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -44,7 +44,7 @@ namespace MercuryOMS.Application.Features
 
         private static Product CreateProduct(CreateProductCommand request)
         {
-            var product = new Product(request.Name, request.BasePrice);
+            var product = new Product(request.Name);
             product.SetDescription(request.Description);
             return product;
         }
@@ -87,15 +87,17 @@ namespace MercuryOMS.Application.Features
 
         private static void HandleVariants(Product product, List<CreateVariantRequest>? variants)
         {
-            if (variants == null) return;
+            if (variants == null || !variants.Any()) return;
 
             foreach (var v in variants)
             {
                 product.AddVariant(
                     v.Sku,
-                    v.Price,
+                    v.OriginalPrice,
+                    v.DiscountPrice,
                     v.Color,
                     v.Stock,
+                    null,
                     v.Size
                 );
             }
@@ -104,8 +106,9 @@ namespace MercuryOMS.Application.Features
         private async Task SaveProductAsync(Product product, CancellationToken ct)
         {
             var productRepo = _unitOfWork.GetRepository<Product>();
+
             await productRepo.AddAsync(product, ct);
-            await _unitOfWork.SaveChangesAsync( ct, true);
+            await _unitOfWork.SaveChangesAsync(ct, true);
         }
     }
 }

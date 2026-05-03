@@ -67,6 +67,7 @@ namespace MercuryOMS.API.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetList(
             [FromQuery] ProductFilterRequest request)
@@ -77,6 +78,7 @@ namespace MercuryOMS.API.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}/categories")]
         public async Task<IActionResult> GetCategories(Guid id)
         {
@@ -86,6 +88,7 @@ namespace MercuryOMS.API.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}/images")]
         public async Task<IActionResult> GetImages(Guid id)
         {
@@ -95,11 +98,24 @@ namespace MercuryOMS.API.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}/variants")]
         public async Task<IActionResult> GetVariants(Guid id)
         {
             var result = await _mediator.Send(
                 new GetProductVariants(id));
+
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("{id}/detail")]
+        public async Task<IActionResult> GetDetail(Guid id)
+        {
+            var result = await _mediator.Send(new GetProductDetail(id));
+
+            if (!result.IsSuccess)
+                return NotFound(result);
 
             return Ok(result);
         }
